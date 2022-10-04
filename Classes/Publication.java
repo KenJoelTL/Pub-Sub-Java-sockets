@@ -26,6 +26,11 @@ public class Publication implements IPublication{
     private Topic topic;
     private Map<String,String> content;
 
+    public Publication(Topic topic, Map<String,String> content) {
+        this.topic = topic;
+        this.content = content;
+    }
+
     @Override
     public void fromXMLtoCanonical(Document xmlDocument) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
