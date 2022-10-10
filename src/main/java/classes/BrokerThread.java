@@ -1,13 +1,12 @@
 package classes;
 
+import main.App;
+
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
-
-import main.App;
 
 
 public class BrokerThread implements Runnable {
@@ -23,7 +22,7 @@ public class BrokerThread implements Runnable {
     private App app;
     
     
-	public BrokerThread(Socket s,List<Topic> t,App p) {
+	public BrokerThread(Socket s, List<Topic> t, App p) {
 		
 		this.isRunning = false;
 		this.socket = s;

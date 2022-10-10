@@ -1,8 +1,7 @@
 package display;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import javax.swing.JFrame;
+import javax.swing.*;
+import java.awt.*;
 
 public class Frame extends JFrame{
 	

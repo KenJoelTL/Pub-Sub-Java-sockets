@@ -1,9 +1,9 @@
-package Classes;
+package classes;
 
 
-import Interfaces.IPublisher;
-import Interfaces.ISubscriber;
-import Interfaces.ITopic;
+import interfaces.IPublisher;
+import interfaces.ISubscriber;
+import interfaces.ITopic;
 import java.util.List;
 
 /*
@@ -17,12 +17,11 @@ import java.util.List;
  * @author AP57630
  */
 enum Format{
-    XML, JSON
+    XML, JSON;
 }
 public class Topic implements ITopic{
-    private String name;
-    private List<IPublisher> pub;
-    private List<ISubscriber>sub;
+    private String name =""; // le topic souhaite
+    private List pub, sub;
 
     public Topic(String name) {
         this.name = name;
@@ -39,16 +38,36 @@ public class Topic implements ITopic{
         return name;
     }
 
+
     @Override
-    public List<IPublisher> getPub() {
+    public List getPub() {
         return pub;
     }
 
     @Override
-    public List<ISubscriber> getSub() {
+    public List getSub() {
         return sub;
     }
-    
-    
-    
+
+    public void addPub(Publisher p) {
+        this.pub.add(p);
+    }
+
+    public void addSub(Subscriber s) {
+        this.sub.add(s);
+    }
+
+    public boolean removePub(Publisher p) {
+        return this.pub.remove(p);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj != null && obj instanceof Topic) {
+            Topic t = (Topic) obj;
+            return this.name.equals(t.getName());
+        }
+        return false;
+
+    }
 }

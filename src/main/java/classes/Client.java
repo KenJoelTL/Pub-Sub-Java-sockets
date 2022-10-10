@@ -3,13 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Classes;
+package classes;
 
-import Interfaces.IClient;
-import Interfaces.IPublication;
-import Interfaces.ITopic;
+import interfaces.IClient;
+
 import java.io.IOException;
-import java.net.DatagramSocket;
 import java.net.Socket;
 
 /**
@@ -22,15 +20,30 @@ public class Client implements IClient{
     private int port, brokerPort;
     private Socket socket;
 
-    @Override
-    public void connect(Socket socket) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-
+    public Client(long id, int port, int brokerPort) {
+        this.id 		= id;
+        this.port 		= port;
+        this.brokerPort = brokerPort;
     }
 
+    @Override
+    public void connect(Socket socket) throws IOException {
+        this.socket = socket;
+    }
 
+    public long getId() {
+        return id;
+    }
 
+    public int getPort() {
+        return port;
+    }
 
+    public int getBrokerPort() {
+        return brokerPort;
+    }
 
-
+    public Socket getSocket() {
+        return socket;
+    }
 }

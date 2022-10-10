@@ -1,10 +1,9 @@
-package Classes;
+package classes;
 
 
-import Interfaces.IPublication;
+import interfaces.IPublication;
 import java.util.Map;
 
-import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -12,7 +11,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

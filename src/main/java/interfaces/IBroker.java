@@ -3,11 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Interfaces;
+package interfaces;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 
 /**
  *

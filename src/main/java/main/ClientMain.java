@@ -1,11 +1,10 @@
 package main;
 
+import classes.Subscriber;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-import classes.Client;
-import classes.Subscriber;
 
 public class ClientMain {
 

@@ -1,14 +1,9 @@
 package display;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import main.App;
+
+import javax.swing.*;
+import java.awt.*;
 
 
 public class MainPanel extends JPanel{
