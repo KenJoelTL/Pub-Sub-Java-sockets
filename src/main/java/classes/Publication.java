@@ -1,10 +1,11 @@
-package Classes;
+package classes;
 
 
-import Interfaces.IPublication;
+import interfaces.IPublication;
+
+import java.io.Serializable;
 import java.util.Map;
 
-import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -12,7 +13,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -24,7 +24,7 @@ import org.xml.sax.InputSource;
  *
  * @author AP57630
  */
-public class Publication implements IPublication{
+public class Publication implements IPublication, Serializable {
     // Le format Canonique est à changer pour qu'il prend en compte les types autres que STRING
     private Topic topic;
     private Map<String,String> content;
