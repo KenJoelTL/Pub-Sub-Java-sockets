@@ -8,8 +8,12 @@ package classes;
 import interfaces.IPublication;
 import interfaces.IPublisher;
 import interfaces.ITopic;
-import java.io.IOException;
+import org.json.JSONObject;
+
+import java.io.*;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -21,23 +25,76 @@ public class Publisher extends Client implements IPublisher{
         super(id, port, brokerPort);
     }
 
+    public Publisher(long id) {
+        super(id);
+    }
+
     @Override
     public void advertise(ITopic t, IPublication.Format format) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+        try {
+            Request req = new Request(this.getId(), "ADVERTISE", format.name(), t.getName() );
+            ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
+            output.writeObject(req);
+
+            ObjectInputStream input = new ObjectInputStream(this.getSocket().getInputStream());
+            String res = (String) input.readObject();
+            System.out.println("Réponse du serveur: "+res);
+            output.close();
+            input.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void publish(ITopic t, IPublication p) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.publish(t.getName(), p.fromCanonicaltoJSON().toString());
     }
 
+    public void publish(String topicName, String content) { //format ?
+        try {
+            Request req = new Request(this.getId(), "PUBLISH", "JSON", topicName, content );
+            ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
+            output.writeObject(req);
+
+            // Réponse du serveur
+            ObjectInputStream input = new ObjectInputStream(this.getSocket().getInputStream());
+            String res = (String) input.readObject();
+            System.out.println("Réponse du serveur: "+res);
+            output.close();
+            input.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @Override
     public void unadvertise(ITopic t, IPublication.Format format){
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            Request req = new Request(this.getId(), "UNADVERTISE", format.name(), t.getName(), format.name() );
+            ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
+            output.writeObject(req);
+
+            //
+            ObjectInputStream input = new ObjectInputStream(this.getSocket().getInputStream());
+            String res = (String) input.readObject();
+            System.out.println("Réponse du serveur: "+res);
+            output.close();
+            input.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public boolean equals(Object obj) {
-        if(obj != null && obj instanceof Topic) {
+        if(obj != null && obj instanceof Publisher) {
             Publisher p = (Publisher) obj;
             return this.getId() == p.getId();
         }

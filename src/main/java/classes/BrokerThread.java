@@ -1,10 +1,11 @@
 package classes;
 
+import interfaces.ISubscriber;
 import main.App;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
@@ -36,20 +37,30 @@ public class BrokerThread implements Runnable {
 	public void run() {
 
 		//le client est ici
-		
+
+		this.listenToPublisher();
+			/*
+
 		try {
-			OutputStream oos = socket.getOutputStream();			
+			OutputStream oos = socket.getOutputStream();
 			PrintWriter writer = new PrintWriter(oos, true);
 			writer.println("This is a message sent to the client");
+
+
+			InputStream input = null;
+			BufferedReader reader 	= null;
+			String message 			="";
+
+
 
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-				
+				*/
 				
 			
-			
+
 			
 			
     	//this.subscribe(null, null);
@@ -82,16 +93,15 @@ public class BrokerThread implements Runnable {
 		if (this.topics.contains(topic)) {
 			return ERROR;
 		}
-
 		topic.addPub(publisher);
 		this.topics.add(topic);
+		System.out.println("advertise!");
 		return SUCCESS;
 	}
 
-	private int unadvertise (Topic topic, Publisher publisher) {
-		if (this.topics.contains(topic.getName())) {
-			return ERROR;
-		}
+	private int unadvertise (Topic topicToFind, Publisher publisher) {
+		Topic topic = this.topics.stream().filter(t -> t.equals(topicToFind)).findFirst().orElse(null);
+		if (topic == null) { return ERROR; }
 
 		int isRemoved = topic.removePub(publisher) ? SUCCESS: ERROR;
 		if(topic.getPub().isEmpty() && topic.getSub().isEmpty()) {
@@ -101,9 +111,26 @@ public class BrokerThread implements Runnable {
 		return isRemoved;
 	}
 
-    private void notifySubscribers() {
+    private void notifySubscribers(Topic topicToFind, String content, String format) throws IOException {
     	//TODO: Chercher les bons topics dans la list et envoyer aux bon subscriber avec le bon FORMAT
     	//boucle sur les sub
+
+
+		Topic topic = this.topics.stream().filter(t -> t.equals(topicToFind)).findFirst().orElse(null);
+		if (topic == null) { return; }
+
+		JSONObject jsonMessage =  (JSONObject) new JSONTokener(content).nextValue();
+		Publication p = new Publication(topic, jsonMessage);
+
+
+		for (ISubscriber sub: topic.getSub()) {
+			String message = p.fromCanonicaltoJSON().toString();
+
+			Socket socketClient = ((Subscriber) sub).getSocket();
+			ObjectOutputStream output = new ObjectOutputStream(socketClient.getOutputStream());
+			output.writeObject(message);
+
+		}
     	/*
     	 * 
     	 * 
@@ -117,7 +144,59 @@ public class BrokerThread implements Runnable {
 	
 	
 	
-	
+	private void listenToPublisher() {
+		Boolean isListening = true;
+		ObjectInputStream  input = null;
+		Request req = null;
+		try {
+			input 	= new ObjectInputStream((this.socket.getInputStream())) ;
+			req = (Request)input.readObject();
+			int response = this.handleRequest(req);
+			ObjectOutputStream output = new ObjectOutputStream(this.socket.getOutputStream());
+			input.close();
+			output.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private int handleRequest(Request req) throws IOException {
+		int response = 0;
+		String action = req.getAction();
+		if ("ADVERTISE".equals(action)) {
+			String topicName = req.getContent();
+			String format = req.getFormat();
+			Topic t = new Topic(topicName);
+			Publisher p = new Publisher(req.getSenderId());
+			response= this.advertise(t,p);
+			this.app.updateLog("Publisher #" + p.getId()  + " has advertised: "+ topicName + " | " + format);
+
+		} else if ("PUBLISH".equals(action)) {
+			//String topicName = reader.readLine();
+
+			String topicName = req.getContent();
+			String format = req.getFormat();
+			Topic t = new Topic(topicName);
+			Publisher p = new Publisher(req.getSenderId());
+			this.notifySubscribers(t, req.getContent(), format);
+
+			this.app.updateLog("Publisher #" + p.getId()  + " has published: "+ topicName + " | " + format);
+		} else if ("UNADVERTISE".equals(action)) {
+			String topicName = req.getContent();
+			String format = req.getFormat();
+			Topic t = new Topic(topicName);
+			Publisher p = new Publisher(req.getSenderId());
+
+			response = this.unadvertise(t, p);
+			this.app.updateLog("Publisher #" + p.getId()  + " has unadvertised: "+ topicName + " | " + format);
+
+		} else {
+			action = "";
+		}
+		return response;
+	}
 	
 	
 	

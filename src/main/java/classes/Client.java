@@ -26,6 +26,10 @@ public class Client implements IClient{
         this.brokerPort = brokerPort;
     }
 
+    public Client(long id) {
+        this.id = id;
+    }
+
     @Override
     public void connect(Socket socket) throws IOException {
         this.socket = socket;
@@ -33,6 +37,10 @@ public class Client implements IClient{
 
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public int getPort() {

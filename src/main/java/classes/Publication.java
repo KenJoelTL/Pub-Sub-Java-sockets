@@ -2,6 +2,8 @@ package classes;
 
 
 import interfaces.IPublication;
+
+import java.io.Serializable;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -22,7 +24,7 @@ import org.w3c.dom.Element;
  *
  * @author AP57630
  */
-public class Publication implements IPublication{
+public class Publication implements IPublication, Serializable {
     // Le format Canonique est à changer pour qu'il prend en compte les types autres que STRING
     private Topic topic;
     private Map<String,String> content;

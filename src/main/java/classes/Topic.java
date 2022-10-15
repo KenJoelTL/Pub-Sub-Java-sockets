@@ -4,6 +4,9 @@ package classes;
 import interfaces.IPublisher;
 import interfaces.ISubscriber;
 import interfaces.ITopic;
+
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -19,18 +22,15 @@ import java.util.List;
 enum Format{
     XML, JSON;
 }
-public class Topic implements ITopic{
+public class Topic implements ITopic, Serializable {
     private String name =""; // le topic souhaite
-    private List pub, sub;
+    private List<IPublisher> pub;
+    private List<ISubscriber> sub;
 
     public Topic(String name) {
         this.name = name;
-    }
-
-    public Topic(String name, List<IPublisher> pub, List<ISubscriber> sub) {
-        this.name = name;
-        this.pub = pub;
-        this.sub = sub;
+        this.pub = new ArrayList<IPublisher>();
+        this.sub = new ArrayList<ISubscriber>();
     }
 
     @Override
@@ -40,12 +40,12 @@ public class Topic implements ITopic{
 
 
     @Override
-    public List getPub() {
+    public List<IPublisher> getPub() {
         return pub;
     }
 
     @Override
-    public List getSub() {
+    public List<ISubscriber> getSub() {
         return sub;
     }
 

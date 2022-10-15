@@ -2,10 +2,8 @@ package classes;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
 import interfaces.*;
 import main.App;
 
@@ -45,6 +43,8 @@ public class Broker implements IBroker,Runnable{
         this.idTracker = 0;
         this.mapClient = new HashMap<Long,Socket>();
 
+        this.topics = new ArrayList<Topic>();
+
         try {
 
             this.serverSocket = new ServerSocket(PORT);
@@ -58,8 +58,8 @@ public class Broker implements IBroker,Runnable{
     public void listenToNetwork() throws IOException{
 
         Socket clientSocket = this.serverSocket.accept();
-        this.incrementID();
-        this.mapClient.put(this.idTracker, clientSocket);
+        //this.incrementID();
+        //this.mapClient.put(this.idTracker, clientSocket); //proposition: faire une list de id, Client ou 2 listes <id-pub>, <id,sub>
         BrokerThread bt = new BrokerThread(clientSocket,this.topics,this.app);
         bt.start();
 
