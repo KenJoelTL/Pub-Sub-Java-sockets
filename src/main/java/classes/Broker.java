@@ -30,18 +30,11 @@ public class Broker implements IBroker,Runnable{
     private boolean isRunning;
     private Thread thread;
     private App app;
-    // private Map<Topic, HashMap<String,String>> subscribersTopicMap = new HashMap<Topic, HashMap<Subscriber>>();
-    private Map<Long,Socket> mapClient;
-
-    private long idTracker;
 
     public Broker(App app) {
 
         this.app 		= app;
         this.isRunning 	= false;
-
-        this.idTracker = 0;
-        this.mapClient = new HashMap<Long,Socket>();
 
         this.topics = new ArrayList<Topic>();
 
@@ -56,26 +49,10 @@ public class Broker implements IBroker,Runnable{
 
     @Override
     public void listenToNetwork() throws IOException{
-
         Socket clientSocket = this.serverSocket.accept();
-        //this.incrementID();
-        //this.mapClient.put(this.idTracker, clientSocket); //proposition: faire une list de id, Client ou 2 listes <id-pub>, <id,sub>
         BrokerThread bt = new BrokerThread(clientSocket,this.topics,this.app);
         bt.start();
-
-
     }
-
-    public void incrementID() {
-        this.idTracker++;
-    }
-
-
-
-
-
-
-
 
     public void run() {
 

@@ -37,14 +37,14 @@ public class Publisher extends Client implements IPublisher{
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);
 
-            ObjectInputStream input = new ObjectInputStream(this.getSocket().getInputStream());
-            String res = (String) input.readObject();
-            System.out.println("Réponse du serveur: "+res);
-            output.close();
-            input.close();
+//            ObjectInputStream input = new ObjectInputStream(this.getSocket().getOutputStream());
+//            String res = (String) input.readObject();
+//            System.out.println("Réponse du serveur: "+res);
+//            output.close();
+//            input.close();
         } catch (IOException e1) {
             e1.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -56,19 +56,19 @@ public class Publisher extends Client implements IPublisher{
 
     public void publish(String topicName, String content) { //format ?
         try {
-            Request req = new Request(this.getId(), "PUBLISH", "JSON", topicName, content );
+            Request req = new Request(this.getId(), "PUBLISH", "JSON", content, topicName);
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);
 
             // Réponse du serveur
-            ObjectInputStream input = new ObjectInputStream(this.getSocket().getInputStream());
-            String res = (String) input.readObject();
-            System.out.println("Réponse du serveur: "+res);
-            output.close();
-            input.close();
+//            ObjectInputStream input = new ObjectInputStream(this.getSocket().getInputStream());
+//            String res = (String) input.readObject();
+//            System.out.println("Réponse du serveur: "+res);
+//            output.close();
+//            input.close();
         } catch (IOException e1) {
             e1.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -79,15 +79,15 @@ public class Publisher extends Client implements IPublisher{
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);
 
-            //
-            ObjectInputStream input = new ObjectInputStream(this.getSocket().getInputStream());
-            String res = (String) input.readObject();
-            System.out.println("Réponse du serveur: "+res);
-            output.close();
-            input.close();
+//            //
+//            ObjectInputStream input = new ObjectInputStream(this.getSocket().getInputStream());
+//            String res = (String) input.readObject();
+//            System.out.println("Réponse du serveur: "+res);
+//            output.close();
+//            input.close();
         } catch (IOException e1) {
             e1.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -99,6 +99,5 @@ public class Publisher extends Client implements IPublisher{
             return this.getId() == p.getId();
         }
         return false;
-
     }
 }

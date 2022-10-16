@@ -57,8 +57,12 @@ public class Topic implements ITopic, Serializable {
         this.sub.add(s);
     }
 
-    public boolean removePub(Publisher p) {
+    public boolean removePub(IPublisher p) {
         return this.pub.remove(p);
+    }
+
+    public boolean removeSub(ISubscriber subscriber) {
+        return this.sub.remove(subscriber);
     }
 
     @Override
@@ -70,4 +74,6 @@ public class Topic implements ITopic, Serializable {
         return false;
 
     }
+
+
 }

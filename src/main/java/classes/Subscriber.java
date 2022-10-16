@@ -14,68 +14,110 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-/**
- *
- * @author AP57630
- */
 public class Subscriber extends Client implements ISubscriber{
 
     private boolean isListening = false;
 
+    private IPublication.Format format;
+
     public Subscriber(long id, int port, int brokerPort) {
         super(id,port,brokerPort);
     }
+
+    public Subscriber(long id,IPublication.Format format) {
+        super(id);
+        this.format = format;
+    }
+
+
     @Override
     public void subscribe(ITopic t, IPublication.Format format) {
-
-        //  throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            Request req = new Request(this.getId(), "SUBSCRIBE", format.name(), t.getName());
+            ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
+            output.writeObject(req);
+            //output.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
     }
 
     @Override
     public void unsubscribe(ITopic t, IPublication.Format format) {
-
-        // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            Request req = new Request(this.getId(), "SUBSCRIBE", format.name(), t.getName());
+            ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
+            output.writeObject(req);
+            //output.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
     }
 
     @Override
     public void listentoBroker() {
+        Thread listenerThread = new Thread() {
+            public void run() {
+                isListening = true;
+                ObjectInputStream oinput = null;
+                BufferedReader reader 	= null;
+                String message 			="";
+                try {
+                    oinput 	= new ObjectInputStream(getSocket().getInputStream());
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                System.out.println("Started listening for incoming stream");
+                while(isListening) {
+                    try {
 
-        this.isListening 		= true;
-        InputStream input = null;
-        BufferedReader reader 	= null;
-        String message 			="";
-
-        try {
-            input 	= this.getSocket().getInputStream() ;
-            reader 	= new BufferedReader(new InputStreamReader(input));
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-
-        while(this.isListening) {
-
-            try {
-
-                message = reader.readLine();
-                System.out.println(message);
-
-            } catch (IOException e) {
-                e.printStackTrace();
+                        String req = (String)oinput.readObject();
+                        System.out.println(req);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                try {
+                    getSocket().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-
-        try {
-            this.getSocket().close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        };
+        listenerThread.start();
     }
 
     public void stopListentoBroker() {
         this.isListening = false;
     }
 
+    public IPublication.Format getFormat() {
+        return format;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj != null && obj instanceof Subscriber) {
+            Subscriber subscriber = (Subscriber) obj;
+            return this.getId() == subscriber.getId() && this.getFormat().equals(subscriber.getFormat());
+        }
+        return false;
+    }
+
+    public void killListener() {
+        isListening = false;
+    }
+
+    public void setSubscriberSocket(Socket s) {
+        try {
+            connect(s);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }

@@ -5,6 +5,8 @@
  */
 package interfaces;
 
+import classes.Subscriber;
+
 import java.util.List;
 
 /**
@@ -18,8 +20,12 @@ public interface ITopic {
 public String getName();
 
 
-    public List getPub();
+    public List<IPublisher> getPub();
 
-    public List getSub();
-    
+    public List<ISubscriber> getSub();
+
+    public boolean removePub(IPublisher publisher);
+
+    public boolean removeSub(ISubscriber subscriber);
+
 }
