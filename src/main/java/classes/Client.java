@@ -54,4 +54,6 @@ public class Client implements IClient{
     public Socket getSocket() {
         return socket;
     }
+
+
 }

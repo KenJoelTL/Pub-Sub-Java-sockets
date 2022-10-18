@@ -26,7 +26,6 @@ public class Publisher extends Client implements IPublisher{
 
     @Override
     public void advertise(ITopic t, IPublication.Format format) {
-
         try {
             Request req = new Request(this.getId(), "ADVERTISE", format.name(), t.getName() );
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());

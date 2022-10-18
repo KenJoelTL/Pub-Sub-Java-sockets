@@ -5,34 +5,33 @@ import interfaces.IPublication;
 import java.io.Serializable;
 
 public class Request implements Serializable {
-    private long senderId;
+    private long senderClientId;
     private String action;
     private String format;
-    private IPublication publication;
     private String content;
     private String topic = "";
 
-    public Request(long senderId, String action, String format, String content, String topic) {
-        this.senderId = senderId;
+    public Request(long senderClientId, String action, String format, String content, String topic) {
+        this.senderClientId = senderClientId;
         this.action = action;
         this.format = format;
         this.content = content;
         this.topic = topic;
     }
 
-    public Request(long senderId, String action, String format, String content) {
-        this.senderId = senderId;
+    public Request(long senderClientId, String action, String format, String content) {
+        this.senderClientId = senderClientId;
         this.action = action;
         this.format = format;
         this.content = content;
     }
 
-    public long getSenderId() {
-        return senderId;
+    public long getSenderClientId() {
+        return senderClientId;
     }
 
-    public void setSenderId(long senderId) {
-        this.senderId = senderId;
+    public void setSenderClientId(long senderClientId) {
+        this.senderClientId = senderClientId;
     }
 
     public String getTopic() {
@@ -57,14 +56,6 @@ public class Request implements Serializable {
 
     public void setFormat(String format) {
         this.format = format;
-    }
-
-    public IPublication getPublication() {
-        return publication;
-    }
-
-    public void setPublication(IPublication publication) {
-        this.publication = publication;
     }
 
     public String getContent() {

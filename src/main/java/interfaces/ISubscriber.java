@@ -13,5 +13,4 @@ public interface ISubscriber{
     public void subscribe(ITopic t, IPublication.Format format);
     public void unsubscribe(ITopic t, IPublication.Format format);
     public void listentoBroker();
-    public IPublication.Format getFormat();
 }

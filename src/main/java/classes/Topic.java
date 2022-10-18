@@ -1,6 +1,7 @@
 package classes;
 
 
+import interfaces.IPublication;
 import interfaces.IPublisher;
 import interfaces.ISubscriber;
 import interfaces.ITopic;
@@ -16,21 +17,24 @@ import java.util.List;
  */
 
 /**
- *
  * @author AP57630
  */
-enum Format{
+enum Format {
     XML, JSON;
 }
+
 public class Topic implements ITopic, Serializable {
-    private String name =""; // le topic souhaite
+    private String name = ""; // le topic souhaite
     private List<IPublisher> pub;
     private List<ISubscriber> sub;
+
+    private List<Subscription> subscriptions;
 
     public Topic(String name) {
         this.name = name;
         this.pub = new ArrayList<IPublisher>();
         this.sub = new ArrayList<ISubscriber>();
+        this.subscriptions = new ArrayList<Subscription>();
     }
 
     @Override
@@ -46,7 +50,16 @@ public class Topic implements ITopic, Serializable {
 
     @Override
     public List<ISubscriber> getSub() {
-        return sub;
+        var subscriberList = new ArrayList<ISubscriber>();
+        for (Subscription s : this.subscriptions) {
+            subscriberList.add(s.getSubscriber());
+        }
+        return subscriberList;
+//        return this.subscriptions.stream().map(s -> s.getSubscriber()).toList();
+    }
+
+    public List<Subscription> getSubscriptions() {
+        return subscriptions;
     }
 
     public void addPub(Publisher p) {
@@ -55,6 +68,24 @@ public class Topic implements ITopic, Serializable {
 
     public void addSub(Subscriber s) {
         this.sub.add(s);
+    }
+
+    public void addSubscription(Subscription s) {
+        this.subscriptions.add(s);
+    }
+
+    public void addSubscription(ISubscriber s, IPublication.Format format) {
+        Subscription newSubscription = new Subscription(s, format);
+        this.subscriptions.add(newSubscription);
+    }
+
+    public void removeSubscription(Subscription s) {
+        this.subscriptions.remove(s);
+    }
+
+    public void removeSubscription(ISubscriber s, IPublication.Format format) {
+        Subscription newSubscription = new Subscription(s, format);
+        this.subscriptions.remove(newSubscription);
     }
 
     public boolean removePub(IPublisher p) {
@@ -67,7 +98,7 @@ public class Topic implements ITopic, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj != null && obj instanceof Topic) {
+        if (obj != null && obj instanceof Topic) {
             Topic t = (Topic) obj;
             return this.name.equals(t.getName());
         }

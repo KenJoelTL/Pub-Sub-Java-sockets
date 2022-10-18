@@ -22,17 +22,13 @@ public class Subscriber extends Client implements ISubscriber{
 
     private boolean isListening = false;
 
-    private IPublication.Format format;
-
     public Subscriber(long id, int port, int brokerPort) {
         super(id,port,brokerPort);
     }
 
-    public Subscriber(long id,IPublication.Format format) {
+    public Subscriber(long id) {
         super(id);
-        this.format = format;
     }
-
 
     @Override
     public void subscribe(ITopic t, IPublication.Format format) {
@@ -49,7 +45,7 @@ public class Subscriber extends Client implements ISubscriber{
     @Override
     public void unsubscribe(ITopic t, IPublication.Format format) {
         try {
-            Request req = new Request(this.getId(), "SUBSCRIBE", format.name(), t.getName());
+            Request req = new Request(this.getId(), "UNSUBSCRIBE", format.name(), t.getName());
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);
             //output.close();
@@ -94,10 +90,6 @@ public class Subscriber extends Client implements ISubscriber{
         this.isListening = false;
     }
 
-    public IPublication.Format getFormat() {
-        return format;
-    }
-
     public void killListener() {
         isListening = false;
     }
@@ -111,15 +103,17 @@ public class Subscriber extends Client implements ISubscriber{
 
     }
 
+
     @Override
-    public boolean equals(Object obj) {
-        if(obj != null && obj instanceof Subscriber) {
-            Subscriber subscriber = (Subscriber) obj;
-            return this.getId() == subscriber.getId() && this.getFormat().equals(subscriber.getFormat());
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Client)) return false;
+        Client that = (Client) o;
+        return this.getId() == that.getId();
     }
 
-
-
+    @Override
+    public int hashCode() {
+        return (int) (getId() ^ (getId() >>> 32));
+    }
 }
