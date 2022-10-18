@@ -8,12 +8,7 @@ package classes;
 import interfaces.IPublication;
 import interfaces.IPublisher;
 import interfaces.ITopic;
-import org.json.JSONObject;
-
 import java.io.*;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -36,12 +31,6 @@ public class Publisher extends Client implements IPublisher{
             Request req = new Request(this.getId(), "ADVERTISE", format.name(), t.getName() );
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);
-
-//            ObjectInputStream input = new ObjectInputStream(this.getSocket().getOutputStream());
-//            String res = (String) input.readObject();
-//            System.out.println("Réponse du serveur: "+res);
-//            output.close();
-//            input.close();
         } catch (IOException e1) {
             e1.printStackTrace();
         } catch (Exception e) {
@@ -49,23 +38,11 @@ public class Publisher extends Client implements IPublisher{
         }
     }
 
-    @Override
-    public void publish(ITopic t, IPublication p) {
-        this.publish(t.getName(), p.fromCanonicaltoJSON().toString());
-    }
-
-    public void publish(String topicName, String content) { //format ?
+    public void publish(String topicName, String content, IPublication.Format format) {
         try {
-            Request req = new Request(this.getId(), "PUBLISH", "JSON", content, topicName);
+            Request req = new Request(this.getId(), "PUBLISH", format.name(), content, topicName);
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);
-
-            // Réponse du serveur
-//            ObjectInputStream input = new ObjectInputStream(this.getSocket().getInputStream());
-//            String res = (String) input.readObject();
-//            System.out.println("Réponse du serveur: "+res);
-//            output.close();
-//            input.close();
         } catch (IOException e1) {
             e1.printStackTrace();
         } catch (Exception e) {
@@ -78,13 +55,6 @@ public class Publisher extends Client implements IPublisher{
             Request req = new Request(this.getId(), "UNADVERTISE", format.name(), t.getName(), format.name() );
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);
-
-//            //
-//            ObjectInputStream input = new ObjectInputStream(this.getSocket().getInputStream());
-//            String res = (String) input.readObject();
-//            System.out.println("Réponse du serveur: "+res);
-//            output.close();
-//            input.close();
         } catch (IOException e1) {
             e1.printStackTrace();
         } catch (Exception e) {

@@ -5,6 +5,11 @@ import interfaces.ISubscriber;
 import main.App;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import java.io.*;
 import java.net.Socket;
@@ -80,22 +85,50 @@ public class BrokerThread implements Runnable {
 
 			Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
 			if (topic == null) { return; }
-
-
-				JSONObject jsonMessage =  (JSONObject) new JSONTokener(content).nextValue();
-				Publication p = new Publication(topic, jsonMessage);
 				for (ISubscriber sub: topic.getSub()) {
+					Publication p = new Publication(topic, format, content);
+					String message = "";
 					try {
-						String message = p.fromCanonicaltoJSON().toString();
+						if(sub.getFormat().equals(IPublication.Format.JSON)) {
+							message = p.fromCanonicalToJSON();
+						}
+						else if(sub.getFormat().equals(IPublication.Format.XML)) {
+							message = p.fromCanonicalToXML();
+						}
+
 						Socket socketClient = ((Subscriber) sub).getSocket();
 						ObjectOutputStream output = new ObjectOutputStream(socketClient.getOutputStream());
 						output.writeObject(message);
+
 					} catch(Exception e) {
 						e.printStackTrace();
 					}
 				}
 
     }
+
+	private static Document convertStringToXMLDocument(String xmlString)
+	{
+		//Parser that produces DOM object trees from XML content
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+		//API to obtain DOM Document instance
+		DocumentBuilder builder = null;
+		try
+		{
+			//Create DocumentBuilder with default configuration
+			builder = factory.newDocumentBuilder();
+
+			//Parse the content to Document object
+			Document doc = builder.parse(new InputSource(new StringReader(xmlString)));
+			return doc;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 		private void listenToRequests() {
 			Boolean isListening = true;

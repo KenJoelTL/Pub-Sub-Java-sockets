@@ -16,8 +16,6 @@ public interface IPublication {
     enum Format {
         XML, JSON;
     }
-    public void fromXMLtoCanonical(Document xmlDocument);
-    public Document fromCanonicaltoXML ();
-    public JSONObject fromCanonicaltoJSON ();
-    public void fromJSONtoCanonical (JSONObject json);
+    public String fromCanonicalToXML ();
+    public String fromCanonicalToJSON ();
 }

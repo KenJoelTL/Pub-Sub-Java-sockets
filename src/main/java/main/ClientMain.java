@@ -46,32 +46,40 @@ public class ClientMain {
 			int clientPort 	= 5051;
 			long clientID 	= 1;
 
-			Socket s 		= new Socket(host,brokerPort);
-			Subscriber sub 	= new Subscriber(clientID,clientPort,brokerPort);
-			sub.connect(s);
+			Socket subscriberSocket 		= new Socket(host,brokerPort);
+			Subscriber subscriber 	= new Subscriber(clientID,clientPort,brokerPort);
+			subscriber.connect(subscriberSocket);
 
-			subscribeTopic(sub);
-			sub.listentoBroker(); // start the loop
+			subscribeTopicJson(subscriber);
+			subscribeTopicXml(subscriber);
+
+			subscriber.listentoBroker(); // start the loop
 
 			// fire event from the publisher
 			Socket pubSocket = new Socket(host,brokerPort);
 			pub.connect(pubSocket);
-			publish(pub);
+			publishJson(pub);
 			pubSocket.close();
+
+			pubSocket = new Socket(host,brokerPort);
+			pub.connect(pubSocket);
+			publishXml(pub);
+			pubSocket.close();
+
 
 			pubSocket = new Socket(host,brokerPort);
 			pub.connect(pubSocket);
 			removeAd(pub);
 			pubSocket.close();
 
-			// finalise by unsubscribing
-			unsubscribeTopic(sub);
-
-			//sub.killListener();
+			// finalise by unsubscribing, the last publish should not be working
+			unsubscribeTopicJson(subscriber);
+			unsubscribeTopicXml(subscriber);
+			subscriber.killListener();
 
 			pubSocket = new Socket(host,brokerPort);
 			pub.connect(pubSocket);
-			publish(pub);
+			publishJson(pub);
 			pubSocket.close();
 
 		} catch (UnknownHostException e) {
@@ -87,8 +95,17 @@ public class ClientMain {
 		p.advertise(t, f);
 	}
 
-	private static void publish(Publisher p) {
-		p.publish("Weather", " { \"hello\":  \"world\"}");
+	private static void publishJson(Publisher p) {
+		p.publish("Weather", " { \"hello\":  \"world\"}", IPublication.Format.JSON);
+	}
+
+	private static void publishXml(Publisher p) {
+		p.publish("Weather", "<note>\n" +
+						"<to>Tove</to>\n" +
+						"<from>Jani</from>\n" +
+						"<heading>Reminder</heading>\n" +
+						"<body>Don't forget me this weekend!</body>\n" +
+						"</note>", IPublication.Format.XML);
 	}
 
 	private static void removeAd(Publisher p) {
@@ -97,17 +114,28 @@ public class ClientMain {
 		p.unadvertise(t, f);
 	}
 
-	private static void subscribeTopic(Subscriber s) {
+	private static void subscribeTopicJson(Subscriber s) {
 		Topic t = new Topic("Weather");
 		IPublication.Format f = IPublication.Format.JSON;
 		s.subscribe(t, f);
 	}
 
-	private static void unsubscribeTopic(Subscriber s) {
+	private static void subscribeTopicXml(Subscriber s) {
+		Topic t = new Topic("Weather");
+		IPublication.Format f = IPublication.Format.XML;
+		s.subscribe(t, f);
+	}
+
+	private static void unsubscribeTopicJson(Subscriber s) {
 		Topic t = new Topic("Weather");
 		IPublication.Format f = IPublication.Format.JSON;
 		s.unsubscribe(t, f);
 	}
 
+	private static void unsubscribeTopicXml(Subscriber s) {
+		Topic t = new Topic("Weather");
+		IPublication.Format f = IPublication.Format.XML;
+		s.unsubscribe(t, f);
+	}
 
 }

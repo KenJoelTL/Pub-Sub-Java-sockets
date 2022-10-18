@@ -66,15 +66,18 @@ public class Subscriber extends Client implements ISubscriber{
                 System.out.println("Started listening for incoming stream");
                 while(isListening) {
                     ObjectInputStream  input = null;
-                    Request req = null;
                     try {
                         input 	= new ObjectInputStream((getSocket().getInputStream())) ;
                         String message = (String)input.readObject();
+                        System.out.println(" ==================================== ");
+                        System.out.println(" ");
                         System.out.println(message);
+                        System.out.println(" ");
+                        System.out.println(" ==================================== ");
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
+                        e.printStackTrace();
                     }
                 }
                 try {
@@ -95,15 +98,6 @@ public class Subscriber extends Client implements ISubscriber{
         return format;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if(obj != null && obj instanceof Subscriber) {
-            Subscriber subscriber = (Subscriber) obj;
-            return this.getId() == subscriber.getId() && this.getFormat().equals(subscriber.getFormat());
-        }
-        return false;
-    }
-
     public void killListener() {
         isListening = false;
     }
@@ -117,6 +111,15 @@ public class Subscriber extends Client implements ISubscriber{
 
     }
 
-    public void setIP(String toString) {
+    @Override
+    public boolean equals(Object obj) {
+        if(obj != null && obj instanceof Subscriber) {
+            Subscriber subscriber = (Subscriber) obj;
+            return this.getId() == subscriber.getId() && this.getFormat().equals(subscriber.getFormat());
+        }
+        return false;
     }
+
+
+
 }

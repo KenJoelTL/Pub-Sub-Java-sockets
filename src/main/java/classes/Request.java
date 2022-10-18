@@ -12,7 +12,6 @@ public class Request implements Serializable {
     private String content;
     private String topic = "";
 
-
     public Request(long senderId, String action, String format, String content, String topic) {
         this.senderId = senderId;
         this.action = action;
