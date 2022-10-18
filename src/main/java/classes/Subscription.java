@@ -18,10 +18,6 @@ public class Subscription {
         return subscriber;
     }
 
-    public void setSubscriber(ISubscriber subscriber) {
-        this.subscriber = subscriber;
-    }
-
     public IPublication.Format getFormat() {
         return format;
     }

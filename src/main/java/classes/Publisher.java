@@ -8,13 +8,15 @@ package classes;
 import interfaces.IPublication;
 import interfaces.IPublisher;
 import interfaces.ITopic;
+
 import java.io.*;
 
 /**
+ * Client qui publie des messages sur un broker
  *
  * @author AP57630
  */
-public class Publisher extends Client implements IPublisher{
+public class Publisher extends Client implements IPublisher {
 
     public Publisher(long id, int port, int brokerPort) {
         super(id, port, brokerPort);
@@ -27,7 +29,7 @@ public class Publisher extends Client implements IPublisher{
     @Override
     public void advertise(ITopic t, IPublication.Format format) {
         try {
-            Request req = new Request(this.getId(), "ADVERTISE", format.name(), t.getName() );
+            Request req = new Request(this.getId(), "ADVERTISE", format.name(), t.getName());
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);
         } catch (IOException e1) {
@@ -48,8 +50,9 @@ public class Publisher extends Client implements IPublisher{
             throw new RuntimeException(e);
         }
     }
+
     @Override
-    public void unadvertise(ITopic t, IPublication.Format format){
+    public void unadvertise(ITopic t, IPublication.Format format) {
         try {
             Request req = new Request(this.getId(), "UNADVERTISE", format.name(), t.getName());
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
@@ -63,7 +66,7 @@ public class Publisher extends Client implements IPublisher{
 
     @Override
     public boolean equals(Object obj) {
-        if(obj != null && obj instanceof Publisher) {
+        if (obj != null && obj instanceof Publisher) {
             Publisher p = (Publisher) obj;
             return this.getId() == p.getId();
         }

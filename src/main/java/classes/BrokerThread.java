@@ -12,7 +12,9 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
-
+/**
+ * Thread gérant l'interaction entre un Client et un Broker
+ */
 public class BrokerThread implements Runnable {
 
     private final int ERROR = -1;
@@ -41,16 +43,29 @@ public class BrokerThread implements Runnable {
         this.listenToRequests();
     }
 
-
+    /**
+     * Crée un abonnement du Client aux Topics spécifiés
+     *
+     * @param topicName    Identifiant du Topic
+     * @param subscription Abonnement d'un Subscriber à un Topic
+     * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
+     */
     private int onSubscribe(String topicName, Subscription subscription) {
         Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
         if (topic == null) return ERROR;
 
-        ((Subscriber)subscription.getSubscriber()).setSubscriberSocket(this.socket);
+        ((Subscriber) subscription.getSubscriber()).setSubscriberSocket(this.socket);
         topic.addSubscription(subscription);
         return SUCCESS;
     }
 
+    /**
+     * Annule l'abonnement du Client
+     *
+     * @param topicName    Identifiant du Topic
+     * @param subscription Abonnement d'un Subscriber à un Topic
+     * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
+     */
     private int onUnsubscribe(String topicName, Subscription subscription) {
         Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null); //TopicManager.find(topicName) tree<Topic>
         if (topic == null) return ERROR;
@@ -59,6 +74,13 @@ public class BrokerThread implements Runnable {
         return SUCCESS;
     }
 
+    /**
+     * Crée annonce de publication pour un Topic pour un format de message source spécifié
+     *
+     * @param topicName Identifiant du Topic
+     * @param ad        Annone de publication d'un publisher pour Topic
+     * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
+     */
     private int onAdvertise(String topicName, Advertisement ad) {
         Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
         if (topic == null) {
@@ -69,6 +91,13 @@ public class BrokerThread implements Runnable {
         return SUCCESS;
     }
 
+    /**
+     * Supprimer l'annonce de publication associée au Topic pour un format spécifié
+     *
+     * @param topicName Identifiant du Topic
+     * @param ad        Annone de publication d'un publisher pour Topic
+     * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
+     */
     private int onUnadvertise(String topicName, Advertisement ad) {
         Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
         if (topic == null) return ERROR;
@@ -81,6 +110,14 @@ public class BrokerThread implements Runnable {
         return isRemoved;
     }
 
+    /**
+     * Diffuse une publication donnée au Subscribers concernés
+     *
+     * @param topicName Identifiant du Topic
+     * @param content   Contenu du message
+     * @param format    Format du message
+     * @throws IOException
+     */
     private void notifySubscribers(String topicName, String content, String format) throws IOException {
         var topicList = this.topics.stream().filter(t -> t.getName().equals(topicName)).toList(); //List of topics
 
@@ -99,7 +136,7 @@ public class BrokerThread implements Runnable {
                     ObjectOutputStream output = new ObjectOutputStream(socketClient.getOutputStream());
                     output.writeObject(message);
 
-                    this.app.updateLog("Subscriber #" + ((Subscriber)subtion.getSubscriber()).getId() + " got NOTIFIED about: " + topicName + " in " + format);
+                    this.app.updateLog("Subscriber #" + ((Subscriber) subtion.getSubscriber()).getId() + " got NOTIFIED about: " + topicName + " in " + format);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -127,6 +164,9 @@ public class BrokerThread implements Runnable {
         return null;
     }
 
+    /**
+     * Écoute les requêtes des clients
+     */
     private void listenToRequests() {
         Boolean isListening = true;
         ObjectInputStream input = null;
@@ -142,6 +182,13 @@ public class BrokerThread implements Runnable {
         }
     }
 
+    /**
+     * Achemine les requêtes envoyées par les clients en fonction de leur action
+     *
+     * @param req Requête d'un client
+     * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
+     * @throws IOException
+     */
     private int handleRequest(Request req) throws IOException {
 
         int response = 0;
@@ -176,8 +223,9 @@ public class BrokerThread implements Runnable {
             Publisher p = new Publisher(req.getSenderClientId());
             Advertisement ad = new Advertisement(p, IPublication.Format.valueOf(format));
             response = this.onUnadvertise(topicName, ad);
-            this.app.updateLog("Publisher #" + p.getId() + " has UNADVERTISED: " + topicName + " | ");
+
             this.socket.close();
+            this.app.updateLog("Publisher #" + p.getId() + " has UNADVERTISED: " + topicName + " | ");
 
         } else if ("SUBSCRIBE".equals(action)) {
 

@@ -55,7 +55,7 @@ public class ClientMain {
             subscribeTopicJson(subscriber, topicName);
             subscribeTopicXml(subscriber, topicName);
 
-            subscriber.listentoBroker(); // start the loop
+            subscriber.listenToBroker(); // start the loop
 
             // fire event from the publisher
             Socket pubSocket = new Socket(host, brokerPort);

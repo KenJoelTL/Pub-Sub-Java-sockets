@@ -18,12 +18,15 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-public class Subscriber extends Client implements ISubscriber{
+/**
+ * Client recevant des publications de Topics auxquels il est abonné
+ */
+public class Subscriber extends Client implements ISubscriber {
 
     private boolean isListening = false;
 
     public Subscriber(long id, int port, int brokerPort) {
-        super(id,port,brokerPort);
+        super(id, port, brokerPort);
     }
 
     public Subscriber(long id) {
@@ -55,16 +58,16 @@ public class Subscriber extends Client implements ISubscriber{
     }
 
     @Override
-    public void listentoBroker() {
+    public void listenToBroker() {
         Thread listenerThread = new Thread() {
             public void run() {
                 isListening = true;
                 System.out.println("Started listening for incoming stream");
-                while(isListening) {
-                    ObjectInputStream  input = null;
+                while (isListening) {
+                    ObjectInputStream input = null;
                     try {
-                        input 	= new ObjectInputStream((getSocket().getInputStream())) ;
-                        String message = (String)input.readObject();
+                        input = new ObjectInputStream((getSocket().getInputStream()));
+                        String message = (String) input.readObject();
                         System.out.println(" ==================================== ");
                         System.out.println(" ");
                         System.out.println(message);
@@ -102,7 +105,6 @@ public class Subscriber extends Client implements ISubscriber{
         }
 
     }
-
 
     @Override
     public boolean equals(Object o) {

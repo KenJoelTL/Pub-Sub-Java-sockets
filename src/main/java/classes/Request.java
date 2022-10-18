@@ -4,6 +4,9 @@ import interfaces.IPublication;
 
 import java.io.Serializable;
 
+/**
+ * La Request est une entité permettant aux Clients d'intéragir avec le serveur
+ */
 public class Request implements Serializable {
     private long senderClientId;
     private String action;

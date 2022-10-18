@@ -9,6 +9,7 @@ import interfaces.ITopic;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -96,16 +97,16 @@ public class Topic implements ITopic, Serializable {
         return this.subscriptions.remove(newSubscription);
     }
 
-
     @Override
-    public boolean equals(Object obj) {
-        if (obj != null && obj instanceof Topic) {
-            Topic t = (Topic) obj;
-            return this.name.equals(t.getName());
-        }
-        return false;
-
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Topic)) return false;
+        Topic topic = (Topic) o;
+        return getName().equals(topic.getName());
     }
 
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName());
+    }
 }

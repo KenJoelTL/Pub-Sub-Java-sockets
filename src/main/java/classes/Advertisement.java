@@ -5,11 +5,19 @@ import interfaces.IPublisher;
 
 import java.util.Objects;
 
+/**
+ * Annonce qui permet à un publisher de publier dans un format spécifié
+ */
 public class Advertisement {
+
     private IPublisher publisher;
     private IPublication.Format format;
 
-
+    /**
+     *
+     * @param publisher Celui qui publie des messages
+     * @param format Le format dans lequel le message source est envoyé au Broker
+     */
     public Advertisement(IPublisher publisher, IPublication.Format format) {
         this.publisher = publisher;
         this.format = format;
@@ -17,10 +25,6 @@ public class Advertisement {
 
     public IPublisher getPublisher() {
         return publisher;
-    }
-
-    public void setPublisher(IPublisher publisher) {
-        this.publisher = publisher;
     }
 
     public IPublication.Format getFormat() {
