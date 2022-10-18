@@ -24,16 +24,13 @@ enum Format {
 }
 
 public class Topic implements ITopic, Serializable {
-    private String name = ""; // le topic souhaite
-    private List<IPublisher> pub;
-    private List<ISubscriber> sub;
-
+    private String name; // le topic souhaite
+    private List<Advertisement> ads;
     private List<Subscription> subscriptions;
 
     public Topic(String name) {
         this.name = name;
-        this.pub = new ArrayList<IPublisher>();
-        this.sub = new ArrayList<ISubscriber>();
+        this.ads = new ArrayList<Advertisement>();
         this.subscriptions = new ArrayList<Subscription>();
     }
 
@@ -45,7 +42,12 @@ public class Topic implements ITopic, Serializable {
 
     @Override
     public List<IPublisher> getPub() {
-        return pub;
+        var publisherList = new ArrayList<IPublisher>();
+        for (Advertisement ad : this.ads) {
+            publisherList.add(ad.getPublisher());
+        }
+        return publisherList;
+//        return this.ads.stream().map(s -> s.getPublisher()).toList();
     }
 
     @Override
@@ -62,12 +64,18 @@ public class Topic implements ITopic, Serializable {
         return subscriptions;
     }
 
-    public void addPub(Publisher p) {
-        this.pub.add(p);
+    public void addAdvertisement(Advertisement ad) {
+        this.ads.add(ad);
     }
 
-    public void addSub(Subscriber s) {
-        this.sub.add(s);
+    public void addAdvertisement(IPublisher p, IPublication.Format format) {
+        Advertisement newAd = new Advertisement(p, format);
+        this.ads.add(newAd);
+    }
+
+
+    public boolean removeAdvertisement(Advertisement ad) {
+        return this.ads.remove(ad);
     }
 
     public void addSubscription(Subscription s) {
@@ -79,22 +87,15 @@ public class Topic implements ITopic, Serializable {
         this.subscriptions.add(newSubscription);
     }
 
-    public void removeSubscription(Subscription s) {
-        this.subscriptions.remove(s);
+    public boolean removeSubscription(Subscription s) {
+        return this.subscriptions.remove(s);
     }
 
-    public void removeSubscription(ISubscriber s, IPublication.Format format) {
+    public boolean removeSubscription(ISubscriber s, IPublication.Format format) {
         Subscription newSubscription = new Subscription(s, format);
-        this.subscriptions.remove(newSubscription);
+        return this.subscriptions.remove(newSubscription);
     }
 
-    public boolean removePub(IPublisher p) {
-        return this.pub.remove(p);
-    }
-
-    public boolean removeSub(ISubscriber subscriber) {
-        return this.sub.remove(subscriber);
-    }
 
     @Override
     public boolean equals(Object obj) {

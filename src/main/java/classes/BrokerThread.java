@@ -26,12 +26,12 @@ public class BrokerThread implements Runnable {
     private App app;
 
 
-    public BrokerThread(Socket s, List<Topic> t, App p) {
+    public BrokerThread(Socket clientSocket, List<Topic> topicList, App app) {
 
         this.isRunning = false;
-        this.socket = s;
-        this.topics = t;
-        this.app = p;
+        this.socket = clientSocket;
+        this.topics = topicList;
+        this.app = app;
         this.app.updateLog("New client connected");
 
     }
@@ -59,18 +59,21 @@ public class BrokerThread implements Runnable {
         return SUCCESS;
     }
 
-    private int onAdvertise(String topicName, Publisher publisher) {
-        Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(new Topic(topicName));
-        topic.addPub(publisher);
-        this.topics.add(topic);
+    private int onAdvertise(String topicName, Advertisement ad) {
+        Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
+        if (topic == null) {
+            topic = new Topic(topicName);
+            this.topics.add(topic);
+        }
+        topic.addAdvertisement(ad);
         return SUCCESS;
     }
 
-    private int onUnadvertise(String topicName, Publisher publisher) {
+    private int onUnadvertise(String topicName, Advertisement ad) {
         Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
         if (topic == null) return ERROR;
 
-        int isRemoved = topic.removePub(publisher) ? SUCCESS : ERROR;
+        int isRemoved = topic.removeAdvertisement(ad) ? SUCCESS : ERROR;
         if (topic.getPub().isEmpty() && topic.getSub().isEmpty()) {
             this.topics.remove(topic);
         }
@@ -146,10 +149,12 @@ public class BrokerThread implements Runnable {
 
         if ("ADVERTISE".equals(action)) {
 
-            String topicName = req.getContent();
+            String topicName = req.getTopic();
             String format = req.getFormat();
             Publisher p = new Publisher(req.getSenderClientId());
-            response = this.onAdvertise(topicName, p);
+
+            Advertisement ad = new Advertisement(p, IPublication.Format.valueOf(format));
+            response = this.onAdvertise(topicName, ad);
 
             this.socket.close();
             this.app.updateLog("Publisher #" + p.getId() + " has ADVERTISED: " + topicName + " | " + format);
@@ -158,22 +163,25 @@ public class BrokerThread implements Runnable {
 
             String topicName = req.getTopic();
             String format = req.getFormat();
+            String content = req.getContent();
             Publisher p = new Publisher(req.getSenderClientId());
-            this.notifySubscribers(topicName, req.getContent(), format);
+            this.notifySubscribers(topicName, content, format);
             this.socket.close();
             this.app.updateLog("Publisher #" + p.getId() + " has PUBLISHED to: " + topicName + " | " + format);
 
         } else if ("UNADVERTISE".equals(action)) {
 
-            String topicName = req.getContent();
+            String topicName = req.getTopic();
+            String format = req.getFormat();
             Publisher p = new Publisher(req.getSenderClientId());
-            response = this.onUnadvertise(topicName, p);
+            Advertisement ad = new Advertisement(p, IPublication.Format.valueOf(format));
+            response = this.onUnadvertise(topicName, ad);
             this.app.updateLog("Publisher #" + p.getId() + " has UNADVERTISED: " + topicName + " | ");
             this.socket.close();
 
         } else if ("SUBSCRIBE".equals(action)) {
 
-            String topicName = req.getContent();
+            String topicName = req.getTopic();
             String format = req.getFormat();
             Subscriber subscriber = new Subscriber(req.getSenderClientId());
 
@@ -183,7 +191,7 @@ public class BrokerThread implements Runnable {
 
         } else if ("UNSUBSCRIBE".equals(action)) {
 
-            String topicName = req.getContent();
+            String topicName = req.getTopic();
             String format = req.getFormat();
             Subscriber subscriber = new Subscriber(req.getSenderClientId());
 

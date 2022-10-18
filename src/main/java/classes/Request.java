@@ -8,22 +8,22 @@ public class Request implements Serializable {
     private long senderClientId;
     private String action;
     private String format;
-    private String content;
-    private String topic = "";
+    private String content = "";
+    private String topic;
 
-    public Request(long senderClientId, String action, String format, String content, String topic) {
+    public Request(long senderClientId, String action, String format, String topic, String content) {
         this.senderClientId = senderClientId;
         this.action = action;
         this.format = format;
-        this.content = content;
         this.topic = topic;
+        this.content = content;
     }
 
-    public Request(long senderClientId, String action, String format, String content) {
+    public Request(long senderClientId, String action, String format, String topic) {
         this.senderClientId = senderClientId;
         this.action = action;
         this.format = format;
-        this.content = content;
+        this.topic = topic;
     }
 
     public long getSenderClientId() {

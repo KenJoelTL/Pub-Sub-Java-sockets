@@ -39,7 +39,7 @@ public class Publisher extends Client implements IPublisher{
 
     public void publish(String topicName, String content, IPublication.Format format) {
         try {
-            Request req = new Request(this.getId(), "PUBLISH", format.name(), content, topicName);
+            Request req = new Request(this.getId(), "PUBLISH", format.name(), topicName, content);
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);
         } catch (IOException e1) {
@@ -51,7 +51,7 @@ public class Publisher extends Client implements IPublisher{
     @Override
     public void unadvertise(ITopic t, IPublication.Format format){
         try {
-            Request req = new Request(this.getId(), "UNADVERTISE", format.name(), t.getName(), format.name() );
+            Request req = new Request(this.getId(), "UNADVERTISE", format.name(), t.getName());
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);
         } catch (IOException e1) {
