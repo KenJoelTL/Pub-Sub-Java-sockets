@@ -67,7 +67,7 @@ public class ClientMain {
 			// finalise by unsubscribing
 			unsubscribeTopic(sub);
 
-			sub.killListener();
+			//sub.killListener();
 
 			pubSocket = new Socket(host,brokerPort);
 			pub.connect(pubSocket);

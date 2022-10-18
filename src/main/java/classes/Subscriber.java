@@ -63,22 +63,18 @@ public class Subscriber extends Client implements ISubscriber{
         Thread listenerThread = new Thread() {
             public void run() {
                 isListening = true;
-                ObjectInputStream oinput = null;
-                BufferedReader reader 	= null;
-                String message 			="";
-                try {
-                    oinput 	= new ObjectInputStream(getSocket().getInputStream());
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
                 System.out.println("Started listening for incoming stream");
                 while(isListening) {
+                    ObjectInputStream  input = null;
+                    Request req = null;
                     try {
-
-                        String req = (String)oinput.readObject();
-                        System.out.println(req);
-                    } catch (Exception e) {
+                        input 	= new ObjectInputStream((getSocket().getInputStream())) ;
+                        String message = (String)input.readObject();
+                        System.out.println(message);
+                    } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
                     }
                 }
                 try {
@@ -119,5 +115,8 @@ public class Subscriber extends Client implements ISubscriber{
             e.printStackTrace();
         }
 
+    }
+
+    public void setIP(String toString) {
     }
 }

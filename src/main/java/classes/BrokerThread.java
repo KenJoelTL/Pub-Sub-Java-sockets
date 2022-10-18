@@ -147,6 +147,7 @@ public class BrokerThread implements Runnable {
 
 				String topicName = req.getContent();
 				String format = req.getFormat();
+
 				Subscriber subscriber = new Subscriber(req.getSenderId(), IPublication.Format.valueOf(format));
 				response = this.onSubscribe(topicName, subscriber);
 
