@@ -1,21 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package classes;
 
 import interfaces.IPublication;
 import interfaces.ISubscriber;
 import interfaces.ITopic;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 
 /**
@@ -64,7 +55,7 @@ public class Subscriber extends Client implements ISubscriber {
                 isListening = true;
                 System.out.println("Started listening for incoming stream");
                 while (isListening) {
-                    ObjectInputStream input = null;
+                    ObjectInputStream input;
                     try {
                         input = new ObjectInputStream((getSocket().getInputStream()));
                         String message = (String) input.readObject();
@@ -73,9 +64,7 @@ public class Subscriber extends Client implements ISubscriber {
                         System.out.println(message);
                         System.out.println(" ");
                         System.out.println(" ==================================== ");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
+                    } catch (IOException | ClassNotFoundException e) {
                         e.printStackTrace();
                     }
                 }

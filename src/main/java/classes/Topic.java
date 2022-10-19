@@ -11,19 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * @author AP57630
  */
-enum Format {
-    XML, JSON;
-}
-
 public class Topic implements ITopic, Serializable {
     private String name; // le topic souhaite
     private List<Advertisement> ads;

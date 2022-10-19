@@ -4,17 +4,11 @@ package classes;
 import interfaces.IPublication;
 
 import java.io.Serializable;
+
 import org.json.JSONObject;
 import org.json.XML;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- *
  * @author AP57630
  */
 public class Publication implements IPublication, Serializable {
@@ -32,10 +26,9 @@ public class Publication implements IPublication, Serializable {
     @Override
     public String fromCanonicalToXML() {
         String xmlstr = "";
-        if(format.equals(Format.JSON)) {
+        if (format.equals(Format.JSON)) {
             xmlstr = XML.toString(message);
-        }
-        else {
+        } else {
             xmlstr = message;
         }
         return xmlstr;
@@ -44,10 +37,10 @@ public class Publication implements IPublication, Serializable {
     @Override
     public String fromCanonicalToJSON() {
         String jsonString = "";
-        if(format.equals(Format.XML)){
+        if (format.equals(Format.XML)) {
             JSONObject json = XML.toJSONObject(message);
             jsonString = json.toString(4);
-        } else  {
+        } else {
             jsonString = message;
         }
         return jsonString;

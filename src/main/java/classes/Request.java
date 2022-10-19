@@ -1,7 +1,5 @@
 package classes;
 
-import interfaces.IPublication;
-
 import java.io.Serializable;
 
 /**

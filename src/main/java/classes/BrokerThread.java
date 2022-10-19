@@ -38,11 +38,6 @@ public class BrokerThread implements Runnable {
 
     }
 
-
-    public void run() {
-        this.listenToRequests();
-    }
-
     /**
      * Crée un abonnement du Client aux Topics spécifiés
      *
@@ -116,9 +111,8 @@ public class BrokerThread implements Runnable {
      * @param topicName Identifiant du Topic
      * @param content   Contenu du message
      * @param format    Format du message
-     * @throws IOException
      */
-    private void notifySubscribers(String topicName, String content, String format) throws IOException {
+    private void notifySubscribers(String topicName, String content, String format) {
         var topicList = this.topics.stream().filter(t -> t.getName().equals(topicName)).toList(); //List of topics
 
         for (Topic topic : topicList) {
@@ -169,8 +163,8 @@ public class BrokerThread implements Runnable {
      */
     private void listenToRequests() {
         Boolean isListening = true;
-        ObjectInputStream input = null;
-        Request req = null;
+        ObjectInputStream input;
+        Request req;
         try {
             input = new ObjectInputStream((this.socket.getInputStream()));
             req = (Request) input.readObject();
@@ -250,6 +244,13 @@ public class BrokerThread implements Runnable {
         }
 
         return response;
+    }
+
+    /**
+     * Lance l'écoute de requêtes - implémentation de la méthode run
+     */
+    public void run() {
+        this.listenToRequests();
     }
 
     //-- synchronized to work directly with the thread
