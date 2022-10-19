@@ -10,22 +10,16 @@ import classes.Subscriber;
 import java.util.List;
 
 /**
- *
  * @author AP57630
  */
- 
+
 
 public interface ITopic {
-    
-public String getName();
 
+    public String getName();
 
     public List<IPublisher> getPub();
 
     public List<ISubscriber> getSub();
-
-    public boolean removePub(IPublisher publisher);
-
-    public boolean removeSub(ISubscriber subscriber);
 
 }

@@ -1,6 +1,7 @@
 package classes;
 
 
+import interfaces.IPublication;
 import interfaces.IPublisher;
 import interfaces.ISubscriber;
 import interfaces.ITopic;
@@ -8,29 +9,20 @@ import interfaces.ITopic;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+import java.util.Objects;
 
 /**
- *
  * @author AP57630
  */
-enum Format{
-    XML, JSON;
-}
 public class Topic implements ITopic, Serializable {
-    private String name =""; // le topic souhaite
-    private List<IPublisher> pub;
-    private List<ISubscriber> sub;
+    private String name; // le topic souhaite
+    private List<Advertisement> ads;
+    private List<Subscription> subscriptions;
 
     public Topic(String name) {
         this.name = name;
-        this.pub = new ArrayList<IPublisher>();
-        this.sub = new ArrayList<ISubscriber>();
+        this.ads = new ArrayList<Advertisement>();
+        this.subscriptions = new ArrayList<Subscription>();
     }
 
     @Override
@@ -41,39 +33,70 @@ public class Topic implements ITopic, Serializable {
 
     @Override
     public List<IPublisher> getPub() {
-        return pub;
+        var publisherList = new ArrayList<IPublisher>();
+        for (Advertisement ad : this.ads) {
+            publisherList.add(ad.getPublisher());
+        }
+        return publisherList;
+//        return this.ads.stream().map(s -> s.getPublisher()).toList();
     }
 
     @Override
     public List<ISubscriber> getSub() {
-        return sub;
+        var subscriberList = new ArrayList<ISubscriber>();
+        for (Subscription s : this.subscriptions) {
+            subscriberList.add(s.getSubscriber());
+        }
+        return subscriberList;
+//        return this.subscriptions.stream().map(s -> s.getSubscriber()).toList();
     }
 
-    public void addPub(Publisher p) {
-        this.pub.add(p);
+    public List<Subscription> getSubscriptions() {
+        return subscriptions;
     }
 
-    public void addSub(Subscriber s) {
-        this.sub.add(s);
+    public void addAdvertisement(Advertisement ad) {
+        this.ads.add(ad);
     }
 
-    public boolean removePub(IPublisher p) {
-        return this.pub.remove(p);
+    public void addAdvertisement(IPublisher p, IPublication.Format format) {
+        Advertisement newAd = new Advertisement(p, format);
+        this.ads.add(newAd);
     }
 
-    public boolean removeSub(ISubscriber subscriber) {
-        return this.sub.remove(subscriber);
+
+    public boolean removeAdvertisement(Advertisement ad) {
+        return this.ads.remove(ad);
+    }
+
+    public void addSubscription(Subscription s) {
+        this.subscriptions.add(s);
+    }
+
+    public void addSubscription(ISubscriber s, IPublication.Format format) {
+        Subscription newSubscription = new Subscription(s, format);
+        this.subscriptions.add(newSubscription);
+    }
+
+    public boolean removeSubscription(Subscription s) {
+        return this.subscriptions.remove(s);
+    }
+
+    public boolean removeSubscription(ISubscriber s, IPublication.Format format) {
+        Subscription newSubscription = new Subscription(s, format);
+        return this.subscriptions.remove(newSubscription);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj != null && obj instanceof Topic) {
-            Topic t = (Topic) obj;
-            return this.name.equals(t.getName());
-        }
-        return false;
-
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Topic)) return false;
+        Topic topic = (Topic) o;
+        return getName().equals(topic.getName());
     }
 
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName());
+    }
 }
