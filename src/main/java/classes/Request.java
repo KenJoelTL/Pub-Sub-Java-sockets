@@ -1,39 +1,38 @@
 package classes;
 
-import interfaces.IPublication;
-
 import java.io.Serializable;
 
+/**
+ * La Request est une entité permettant aux Clients d'intéragir avec le serveur
+ */
 public class Request implements Serializable {
-    private long senderId;
+    private long senderClientId;
     private String action;
     private String format;
-    private IPublication publication;
-    private String content;
-    private String topic = "";
+    private String content = "";
+    private String topic;
 
-
-    public Request(long senderId, String action, String format, String content, String topic) {
-        this.senderId = senderId;
+    public Request(long senderClientId, String action, String format, String topic, String content) {
+        this.senderClientId = senderClientId;
         this.action = action;
         this.format = format;
+        this.topic = topic;
         this.content = content;
+    }
+
+    public Request(long senderClientId, String action, String format, String topic) {
+        this.senderClientId = senderClientId;
+        this.action = action;
+        this.format = format;
         this.topic = topic;
     }
 
-    public Request(long senderId, String action, String format, String content) {
-        this.senderId = senderId;
-        this.action = action;
-        this.format = format;
-        this.content = content;
+    public long getSenderClientId() {
+        return senderClientId;
     }
 
-    public long getSenderId() {
-        return senderId;
-    }
-
-    public void setSenderId(long senderId) {
-        this.senderId = senderId;
+    public void setSenderClientId(long senderClientId) {
+        this.senderClientId = senderClientId;
     }
 
     public String getTopic() {
@@ -58,14 +57,6 @@ public class Request implements Serializable {
 
     public void setFormat(String format) {
         this.format = format;
-    }
-
-    public IPublication getPublication() {
-        return publication;
-    }
-
-    public void setPublication(IPublication publication) {
-        this.publication = publication;
     }
 
     public String getContent() {

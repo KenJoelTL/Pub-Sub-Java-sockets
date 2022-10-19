@@ -13,11 +13,9 @@ import org.json.JSONObject;
  * @author AP57630
  */
 public interface IPublication {
-    enum Format{
-    XML, JSON;
-}
-    public void fromXMLtoCanonical(Document xmlDocument);
-    public Document fromCanonicaltoXML ();
-    public JSONObject fromCanonicaltoJSON ();
-    public void fromJSONtoCanonical (JSONObject json);
+    enum Format {
+        XML, JSON;
+    }
+    public String fromCanonicalToXML ();
+    public String fromCanonicalToJSON ();
 }

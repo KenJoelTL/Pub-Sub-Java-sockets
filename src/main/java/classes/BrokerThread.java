@@ -1,237 +1,285 @@
 package classes;
 
-import interfaces.ISubscriber;
+import interfaces.IPublication;
 import main.App;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
-
+/**
+ * Thread gérant l'interaction entre un Client et un Broker
+ */
 public class BrokerThread implements Runnable {
 
-	private final int 	ERROR	= -1;
-	private final int 	SUCCESS = 1;
-	
-	
-    private Socket 	socket;
+    private final int ERROR = -1;
+    private final int SUCCESS = 1;
+
+
+    private Socket socket;
     private boolean isRunning;
-    private Thread 	thread;
+    private Thread thread;
     private List<Topic> topics;
     private App app;
-    
-    
-	public BrokerThread(Socket s, List<Topic> t, App p) {
-		
-		this.isRunning = false;
-		this.socket = s;
-		this.topics = t;
-		this.app = p;
-    	this.app.updateLog("New client connected");
-	}
-	
-	
-	
-	public void run() {
-
-		//le client est ici
-
-		this.listenToPublisher();
-			/*
-
-		try {
-			OutputStream oos = socket.getOutputStream();
-			PrintWriter writer = new PrintWriter(oos, true);
-			writer.println("This is a message sent to the client");
 
 
-			InputStream input = null;
-			BufferedReader reader 	= null;
-			String message 			="";
+    public BrokerThread(Socket clientSocket, List<Topic> topicList, App app) {
 
+        this.isRunning = false;
+        this.socket = clientSocket;
+        this.topics = topicList;
+        this.app = app;
+        this.app.updateLog("New client connected");
 
-
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-				*/
-				
-			
-
-			
-			
-    	//this.subscribe(null, null);
-    	//this.unsubscribe(null, null);
-    	//this.notifySubscribers();
-			
-			
-			
-			
-	}
-	
-	
-    private int onSubscribe(String t, Subscriber s) {
-    	
-    	//-- on check si le topic existe ou pas
-    	if(!this.topics.contains(t)) return ERROR;
-		//TODO: Chercher les bons topics dans la list et ajouter le subscriber aux topics trouvés
-		return SUCCESS;
-
-    	//Topic topic = this.topics.g
-    	
-    } 
-    
-    
-    private void unsubscribe (Topic topic, Subscriber subscriber) {
-		//TODO: Chercher les bons topics dans la list et enlever le subscriber aux topics trouvés
     }
 
-	private int advertise (Topic topic, Publisher publisher) {
-		if (this.topics.contains(topic)) {
-			return ERROR;
-		}
-		topic.addPub(publisher);
-		this.topics.add(topic);
-		System.out.println("advertise!");
-		return SUCCESS;
-	}
+    /**
+     * Crée un abonnement du Client aux Topics spécifiés
+     *
+     * @param topicName    Identifiant du Topic
+     * @param subscription Abonnement d'un Subscriber à un Topic
+     * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
+     */
+    private int onSubscribe(String topicName, Subscription subscription) {
+        Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
+        if (topic == null) return ERROR;
 
-	private int unadvertise (Topic topicToFind, Publisher publisher) {
-		Topic topic = this.topics.stream().filter(t -> t.equals(topicToFind)).findFirst().orElse(null);
-		if (topic == null) { return ERROR; }
-
-		int isRemoved = topic.removePub(publisher) ? SUCCESS: ERROR;
-		if(topic.getPub().isEmpty() && topic.getSub().isEmpty()) {
-			this.topics.remove(topic);
-		}
-
-		return isRemoved;
-	}
-
-    private void notifySubscribers(Topic topicToFind, String content, String format) throws IOException {
-    	//TODO: Chercher les bons topics dans la list et envoyer aux bon subscriber avec le bon FORMAT
-    	//boucle sur les sub
-
-
-		Topic topic = this.topics.stream().filter(t -> t.equals(topicToFind)).findFirst().orElse(null);
-		if (topic == null) { return; }
-
-		JSONObject jsonMessage =  (JSONObject) new JSONTokener(content).nextValue();
-		Publication p = new Publication(topic, jsonMessage);
-
-
-		for (ISubscriber sub: topic.getSub()) {
-			String message = p.fromCanonicaltoJSON().toString();
-
-			Socket socketClient = ((Subscriber) sub).getSocket();
-			ObjectOutputStream output = new ObjectOutputStream(socketClient.getOutputStream());
-			output.writeObject(message);
-
-		}
-    	/*
-    	 * 
-    	 * 
-    	 * 
-    	 * 
-    	 * 
-    	 * */
+        ((Subscriber) subscription.getSubscriber()).setSubscriberSocket(this.socket);
+        topic.addSubscription(subscription);
+        return SUCCESS;
     }
 
-	
-	
-	
-	
-	private void listenToPublisher() {
-		Boolean isListening = true;
-		ObjectInputStream  input = null;
-		Request req = null;
-		try {
-			input 	= new ObjectInputStream((this.socket.getInputStream())) ;
-			req = (Request)input.readObject();
-			int response = this.handleRequest(req);
-			ObjectOutputStream output = new ObjectOutputStream(this.socket.getOutputStream());
-			input.close();
-			output.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    /**
+     * Annule l'abonnement du Client
+     *
+     * @param topicName    Identifiant du Topic
+     * @param subscription Abonnement d'un Subscriber à un Topic
+     * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
+     */
+    private int onUnsubscribe(String topicName, Subscription subscription) {
+        Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null); //TopicManager.find(topicName) tree<Topic>
+        if (topic == null) return ERROR;
 
-	private int handleRequest(Request req) throws IOException {
-		int response = 0;
-		String action = req.getAction();
-		if ("ADVERTISE".equals(action)) {
-			String topicName = req.getContent();
-			String format = req.getFormat();
-			Topic t = new Topic(topicName);
-			Publisher p = new Publisher(req.getSenderId());
-			response= this.advertise(t,p);
-			this.app.updateLog("Publisher #" + p.getId()  + " has advertised: "+ topicName + " | " + format);
+        topic.removeSubscription(subscription);
+        return SUCCESS;
+    }
 
-		} else if ("PUBLISH".equals(action)) {
-			//String topicName = reader.readLine();
+    /**
+     * Crée annonce de publication pour un Topic pour un format de message source spécifié
+     *
+     * @param topicName Identifiant du Topic
+     * @param ad        Annone de publication d'un publisher pour Topic
+     * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
+     */
+    private int onAdvertise(String topicName, Advertisement ad) {
+        Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
+        if (topic == null) {
+            topic = new Topic(topicName);
+            this.topics.add(topic);
+        }
+        topic.addAdvertisement(ad);
+        return SUCCESS;
+    }
 
-			String topicName = req.getContent();
-			String format = req.getFormat();
-			Topic t = new Topic(topicName);
-			Publisher p = new Publisher(req.getSenderId());
-			this.notifySubscribers(t, req.getContent(), format);
+    /**
+     * Supprimer l'annonce de publication associée au Topic pour un format spécifié
+     *
+     * @param topicName Identifiant du Topic
+     * @param ad        Annone de publication d'un publisher pour Topic
+     * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
+     */
+    private int onUnadvertise(String topicName, Advertisement ad) {
+        Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
+        if (topic == null) return ERROR;
 
-			this.app.updateLog("Publisher #" + p.getId()  + " has published: "+ topicName + " | " + format);
-		} else if ("UNADVERTISE".equals(action)) {
-			String topicName = req.getContent();
-			String format = req.getFormat();
-			Topic t = new Topic(topicName);
-			Publisher p = new Publisher(req.getSenderId());
+        int isRemoved = topic.removeAdvertisement(ad) ? SUCCESS : ERROR;
+        if (topic.getPub().isEmpty() && topic.getSub().isEmpty()) {
+            this.topics.remove(topic);
+        }
 
-			response = this.unadvertise(t, p);
-			this.app.updateLog("Publisher #" + p.getId()  + " has unadvertised: "+ topicName + " | " + format);
+        return isRemoved;
+    }
 
-		} else {
-			action = "";
-		}
-		return response;
-	}
-	
-	
-	
-	
-	
-	
-	
-		
-		
-		
-	//-- synchronized to work directly with the thread
-	public synchronized void start(){
-	
-		if(this.isRunning){ 
-			return;
-		}
-		
-		this.isRunning = true;
-		
-		this.thread	= new Thread(this);
-		this.thread.start();
-	}
-	
-	public synchronized void stop(){
-		
-		if(!this.isRunning){ 
-			return; 
-		}
-		
-		this.isRunning = false;
-		
-		try {
-			this.thread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+    /**
+     * Diffuse une publication donnée au Subscribers concernés
+     *
+     * @param topicName Identifiant du Topic
+     * @param content   Contenu du message
+     * @param format    Format du message
+     */
+    private void notifySubscribers(String topicName, String content, String format) {
+        var topicList = this.topics.stream().filter(t -> t.getName().equals(topicName)).toList(); //List of topics
+
+        for (Topic topic : topicList) {
+            for (Subscription subtion : topic.getSubscriptions()) {
+                Publication p = new Publication(topic, format, content);
+                String message = "";
+                try {
+                    if (subtion.getFormat().equals(IPublication.Format.JSON)) {
+                        message = p.fromCanonicalToJSON();
+                    } else if (subtion.getFormat().equals(IPublication.Format.XML)) {
+                        message = p.fromCanonicalToXML();
+                    }
+
+                    Socket socketClient = ((Subscriber) subtion.getSubscriber()).getSocket();
+                    ObjectOutputStream output = new ObjectOutputStream(socketClient.getOutputStream());
+                    output.writeObject(message);
+
+                    this.app.updateLog("Subscriber #" + ((Subscriber) subtion.getSubscriber()).getId() + " got NOTIFIED about: " + topicName + " in " + format);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private static Document convertStringToXMLDocument(String xmlString) {
+        //Parser that produces DOM object trees from XML content
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+        //API to obtain DOM Document instance
+        DocumentBuilder builder = null;
+        try {
+            //Create DocumentBuilder with default configuration
+            builder = factory.newDocumentBuilder();
+
+            //Parse the content to Document object
+            Document doc = builder.parse(new InputSource(new StringReader(xmlString)));
+            return doc;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Écoute les requêtes des clients
+     */
+    private void listenToRequests() {
+        Boolean isListening = true;
+        ObjectInputStream input;
+        Request req;
+        try {
+            input = new ObjectInputStream((this.socket.getInputStream()));
+            req = (Request) input.readObject();
+            this.handleRequest(req);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Achemine les requêtes envoyées par les clients en fonction de leur action
+     *
+     * @param req Requête d'un client
+     * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
+     * @throws IOException
+     */
+    private int handleRequest(Request req) throws IOException {
+
+        int response = 0;
+        String action = req.getAction();
+
+        if ("ADVERTISE".equals(action)) {
+
+            String topicName = req.getTopic();
+            String format = req.getFormat();
+            Publisher p = new Publisher(req.getSenderClientId());
+
+            Advertisement ad = new Advertisement(p, IPublication.Format.valueOf(format));
+            response = this.onAdvertise(topicName, ad);
+
+            this.socket.close();
+            this.app.updateLog("Publisher #" + p.getId() + " has ADVERTISED: " + topicName + " | " + format);
+
+        } else if ("PUBLISH".equals(action)) {
+
+            String topicName = req.getTopic();
+            String format = req.getFormat();
+            String content = req.getContent();
+            Publisher p = new Publisher(req.getSenderClientId());
+            this.notifySubscribers(topicName, content, format);
+            this.socket.close();
+            this.app.updateLog("Publisher #" + p.getId() + " has PUBLISHED to: " + topicName + " | " + format);
+
+        } else if ("UNADVERTISE".equals(action)) {
+
+            String topicName = req.getTopic();
+            String format = req.getFormat();
+            Publisher p = new Publisher(req.getSenderClientId());
+            Advertisement ad = new Advertisement(p, IPublication.Format.valueOf(format));
+            response = this.onUnadvertise(topicName, ad);
+
+            this.socket.close();
+            this.app.updateLog("Publisher #" + p.getId() + " has UNADVERTISED: " + topicName + " | ");
+
+        } else if ("SUBSCRIBE".equals(action)) {
+
+            String topicName = req.getTopic();
+            String format = req.getFormat();
+            Subscriber subscriber = new Subscriber(req.getSenderClientId());
+
+            Subscription subscription = new Subscription(subscriber, IPublication.Format.valueOf(format));
+            response = this.onSubscribe(topicName, subscription);
+            this.app.updateLog("Subscriber #" + subscriber.getId() + " has SUBSCRIBED to: " + topicName + " | " + format);
+
+        } else if ("UNSUBSCRIBE".equals(action)) {
+
+            String topicName = req.getTopic();
+            String format = req.getFormat();
+            Subscriber subscriber = new Subscriber(req.getSenderClientId());
+
+            Subscription subscription = new Subscription(subscriber, IPublication.Format.valueOf(format));
+            response = this.onUnsubscribe(topicName, subscription);
+            this.app.updateLog("Subscriber #" + subscriber.getId() + " has UNSUBSCRIBED to: " + topicName + " | " + format);
+
+        }
+
+        return response;
+    }
+
+    /**
+     * Lance l'écoute de requêtes - implémentation de la méthode run
+     */
+    public void run() {
+        this.listenToRequests();
+    }
+
+    //-- synchronized to work directly with the thread
+    public synchronized void start() {
+
+        if (this.isRunning) {
+            return;
+        }
+
+        this.isRunning = true;
+
+        this.thread = new Thread(this);
+        this.thread.start();
+    }
+
+    public synchronized void stop() {
+
+        if (!this.isRunning) {
+            return;
+        }
+
+        this.isRunning = false;
+        this.app.updateLog("Client disconnected");
+
+        try {
+            this.thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

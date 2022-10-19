@@ -16,10 +16,9 @@ import java.io.IOException;
  */
 
 /**
- *
  * @author AP57630
  */
-public class Broker implements IBroker,Runnable{
+public class Broker implements IBroker, Runnable {
 
 
     private final int PORT = 8022;
@@ -30,18 +29,11 @@ public class Broker implements IBroker,Runnable{
     private boolean isRunning;
     private Thread thread;
     private App app;
-    // private Map<Topic, HashMap<String,String>> subscribersTopicMap = new HashMap<Topic, HashMap<Subscriber>>();
-    private Map<Long,Socket> mapClient;
-
-    private long idTracker;
 
     public Broker(App app) {
 
-        this.app 		= app;
-        this.isRunning 	= false;
-
-        this.idTracker = 0;
-        this.mapClient = new HashMap<Long,Socket>();
+        this.app = app;
+        this.isRunning = false;
 
         this.topics = new ArrayList<Topic>();
 
@@ -55,33 +47,17 @@ public class Broker implements IBroker,Runnable{
     }
 
     @Override
-    public void listenToNetwork() throws IOException{
-
+    public void listenToNetwork() throws IOException {
         Socket clientSocket = this.serverSocket.accept();
-        //this.incrementID();
-        //this.mapClient.put(this.idTracker, clientSocket); //proposition: faire une list de id, Client ou 2 listes <id-pub>, <id,sub>
-        BrokerThread bt = new BrokerThread(clientSocket,this.topics,this.app);
+        BrokerThread bt = new BrokerThread(clientSocket, this.topics, this.app);
         bt.start();
-
-
     }
-
-    public void incrementID() {
-        this.idTracker++;
-    }
-
-
-
-
-
-
-
 
     public void run() {
 
         this.app.updateLog("Server is listening on port " + PORT);
 
-        while(this.isRunning){
+        while (this.isRunning) {
 
             try {
 
@@ -95,7 +71,7 @@ public class Broker implements IBroker,Runnable{
 
         try {
 
-            if(!this.serverSocket.isClosed()) {
+            if (!this.serverSocket.isClosed()) {
                 this.serverSocket.close();
             }
 
@@ -115,21 +91,21 @@ public class Broker implements IBroker,Runnable{
         }
     }
 
-    public synchronized void start(){
+    public synchronized void start() {
 
-        if(this.isRunning){
+        if (this.isRunning) {
             return;
         }
 
         this.isRunning = true;
 
-        this.thread	= new Thread(this);
+        this.thread = new Thread(this);
         this.thread.start();
     }
 
-    public synchronized void stop(){
+    public synchronized void stop() {
 
-        if(!this.isRunning){
+        if (!this.isRunning) {
             return;
         }
 
