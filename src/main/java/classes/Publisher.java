@@ -13,6 +13,10 @@ import java.io.*;
  */
 public class Publisher extends Client implements IPublisher {
 
+    public Publisher(long id, int port, int brokerPort, String host) {
+        super(id, port, brokerPort, host);
+    }
+
     public Publisher(long id, int port, int brokerPort) {
         super(id, port, brokerPort);
     }

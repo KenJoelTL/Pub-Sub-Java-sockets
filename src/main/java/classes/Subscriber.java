@@ -16,6 +16,10 @@ public class Subscriber extends Client implements ISubscriber {
 
     private boolean isListening = false;
 
+    public Subscriber(long id, int port, int brokerPort, String host) {
+        super(id, port, brokerPort, host);
+    }
+
     public Subscriber(long id, int port, int brokerPort) {
         super(id, port, brokerPort);
     }
@@ -84,15 +88,6 @@ public class Subscriber extends Client implements ISubscriber {
 
     public void killListener() {
         isListening = false;
-    }
-
-    public void setSubscriberSocket(Socket s) {
-        try {
-            connect(s);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
     @Override

@@ -24,15 +24,15 @@ public class BrokerThread implements Runnable {
     private Socket socket;
     private boolean isRunning;
     private Thread thread;
-    private List<Topic> topics;
+    private TopicRepository topicRepo;
     private App app;
 
 
-    public BrokerThread(Socket clientSocket, List<Topic> topicList, App app) {
+    public BrokerThread(Socket clientSocket, TopicRepository topicRepository, App app) {
 
         this.isRunning = false;
         this.socket = clientSocket;
-        this.topics = topicList;
+        this.topicRepo = topicRepository;
         this.app = app;
         this.app.updateLog("New client connected");
 
@@ -46,10 +46,15 @@ public class BrokerThread implements Runnable {
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
     private int onSubscribe(String topicName, Subscription subscription) {
-        Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
-        if (topic == null) return ERROR;
-
-        ((Subscriber) subscription.getSubscriber()).setSubscriberSocket(this.socket);
+        Topic topic;
+        List<Topic> topicList = this.topicRepo.findByName(topicName);
+        if (topicList.isEmpty()) {
+            topic = new Topic(topicName);
+            this.topicRepo.add(topic);
+        } else {
+            topic = topicList.get(0);
+        }
+        ((Subscriber) subscription.getSubscriber()).setSocket(this.socket);
         topic.addSubscription(subscription);
         return SUCCESS;
     }
@@ -62,9 +67,10 @@ public class BrokerThread implements Runnable {
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
     private int onUnsubscribe(String topicName, Subscription subscription) {
-        Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null); //TopicManager.find(topicName) tree<Topic>
-        if (topic == null) return ERROR;
+        List<Topic> topicList = this.topicRepo.findByName(topicName);
+        if (topicList.isEmpty()) return ERROR;
 
+        Topic topic = topicList.get(0);
         topic.removeSubscription(subscription);
         return SUCCESS;
     }
@@ -77,10 +83,13 @@ public class BrokerThread implements Runnable {
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
     private int onAdvertise(String topicName, Advertisement ad) {
-        Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
-        if (topic == null) {
+        Topic topic;
+        List<Topic> topicList = this.topicRepo.findByName(topicName);
+        if (topicList.isEmpty()) {
             topic = new Topic(topicName);
-            this.topics.add(topic);
+            this.topicRepo.add(topic);
+        } else {
+            topic = topicList.get(0);
         }
         topic.addAdvertisement(ad);
         return SUCCESS;
@@ -94,12 +103,13 @@ public class BrokerThread implements Runnable {
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
     private int onUnadvertise(String topicName, Advertisement ad) {
-        Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
-        if (topic == null) return ERROR;
+        List<Topic> topicList = this.topicRepo.findByName(topicName);
+        if (topicList.isEmpty()) return ERROR;
 
+        Topic topic = topicList.get(0);
         int isRemoved = topic.removeAdvertisement(ad) ? SUCCESS : ERROR;
         if (topic.getPub().isEmpty() && topic.getSub().isEmpty()) {
-            this.topics.remove(topic);
+            this.topicRepo.remove(topic);
         }
 
         return isRemoved;
@@ -113,16 +123,16 @@ public class BrokerThread implements Runnable {
      * @param format    Format du message
      */
     private void notifySubscribers(String topicName, String content, String format) {
-        var topicList = this.topics.stream().filter(t -> t.getName().equals(topicName)).toList(); //List of topics
+        var topicList = this.topicRepo.findByCorrespondingName(topicName); //List of topics
 
         for (Topic topic : topicList) {
             for (Subscription subtion : topic.getSubscriptions()) {
                 Publication p = new Publication(topic, format, content);
                 String message = "";
                 try {
-                    if (subtion.getFormat().equals(IPublication.Format.JSON)) {
+                    if (subtion.getFormat() == IPublication.Format.JSON) {
                         message = p.fromCanonicalToJSON();
-                    } else if (subtion.getFormat().equals(IPublication.Format.XML)) {
+                    } else if (subtion.getFormat() == IPublication.Format.XML) {
                         message = p.fromCanonicalToXML();
                     }
 
@@ -137,25 +147,6 @@ public class BrokerThread implements Runnable {
                 }
             }
         }
-    }
-
-    private static Document convertStringToXMLDocument(String xmlString) {
-        //Parser that produces DOM object trees from XML content
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
-        //API to obtain DOM Document instance
-        DocumentBuilder builder = null;
-        try {
-            //Create DocumentBuilder with default configuration
-            builder = factory.newDocumentBuilder();
-
-            //Parse the content to Document object
-            Document doc = builder.parse(new InputSource(new StringReader(xmlString)));
-            return doc;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**
@@ -197,8 +188,8 @@ public class BrokerThread implements Runnable {
             Advertisement ad = new Advertisement(p, IPublication.Format.valueOf(format));
             response = this.onAdvertise(topicName, ad);
 
-            this.socket.close();
             this.app.updateLog("Publisher #" + p.getId() + " has ADVERTISED: " + topicName + " | " + format);
+            this.stop();
 
         } else if ("PUBLISH".equals(action)) {
 
@@ -207,9 +198,8 @@ public class BrokerThread implements Runnable {
             String content = req.getContent();
             Publisher p = new Publisher(req.getSenderClientId());
             this.notifySubscribers(topicName, content, format);
-            this.socket.close();
             this.app.updateLog("Publisher #" + p.getId() + " has PUBLISHED to: " + topicName + " | " + format);
-
+            this.stop();
         } else if ("UNADVERTISE".equals(action)) {
 
             String topicName = req.getTopic();
@@ -218,8 +208,8 @@ public class BrokerThread implements Runnable {
             Advertisement ad = new Advertisement(p, IPublication.Format.valueOf(format));
             response = this.onUnadvertise(topicName, ad);
 
-            this.socket.close();
             this.app.updateLog("Publisher #" + p.getId() + " has UNADVERTISED: " + topicName + " | ");
+            this.stop();
 
         } else if ("SUBSCRIBE".equals(action)) {
 
@@ -276,9 +266,12 @@ public class BrokerThread implements Runnable {
         this.app.updateLog("Client disconnected");
 
         try {
+            this.socket.close();
             this.thread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

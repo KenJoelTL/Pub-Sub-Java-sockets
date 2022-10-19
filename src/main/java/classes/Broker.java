@@ -23,7 +23,7 @@ public class Broker implements IBroker, Runnable {
 
     private final int PORT = 8022;
 
-    private List<Topic> topics;
+    private TopicRepository topicRepository;
     private long id;
     private ServerSocket serverSocket;
     private boolean isRunning;
@@ -35,7 +35,7 @@ public class Broker implements IBroker, Runnable {
         this.app = app;
         this.isRunning = false;
 
-        this.topics = new ArrayList<Topic>();
+        this.topicRepository = new TopicRepository(new ArrayList<Topic>());
 
         try {
 
@@ -49,7 +49,7 @@ public class Broker implements IBroker, Runnable {
     @Override
     public void listenToNetwork() throws IOException {
         Socket clientSocket = this.serverSocket.accept();
-        BrokerThread bt = new BrokerThread(clientSocket, this.topics, this.app);
+        BrokerThread bt = new BrokerThread(clientSocket, this.topicRepository, this.app);
         bt.start();
     }
 
