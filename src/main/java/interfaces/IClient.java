@@ -3,25 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Interfaces;
+package interfaces;
 
-import java.util.List;
-import org.w3c.dom.Document;
-import org.json.JSONObject;
+import java.io.IOException;
+import java.net.Socket;
 
 /**
  *
  * @author AP57630
  */
- 
+public interface IClient {    
+    public void connect() throws IOException;
+    public void disconnect() throws IOException;
 
-public interface ITopic {
-    
-public String getName();
-
-
-    public List getPub();
-
-    public List getSub();
-    
 }

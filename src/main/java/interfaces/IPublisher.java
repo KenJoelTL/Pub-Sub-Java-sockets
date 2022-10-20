@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Interfaces;
+package interfaces;
 
 /**
  *
@@ -11,6 +11,6 @@ package Interfaces;
  */
 public interface IPublisher{
     public void advertise(ITopic t, IPublication.Format format);
-    public void publish(ITopic t, IPublication p);
+    public void publish(String topicName, String content,IPublication.Format format);
     public void unadvertise(ITopic t, IPublication.Format format);
 }

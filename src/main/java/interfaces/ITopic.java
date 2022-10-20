@@ -3,16 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Interfaces;
+package interfaces;
 
-import java.io.IOException;
-import java.net.Socket;
-import Interfaces.IPublication.Format;
+import java.util.List;
 
 /**
- *
  * @author AP57630
  */
-public interface IClient {    
-    public void connect(Socket socket) throws IOException;    
+
+
+public interface ITopic {
+
+    public String getName();
+
+    public List<IPublisher> getPub();
+
+    public List<ISubscriber> getSub();
+
 }
