@@ -45,7 +45,7 @@ public class BrokerThread implements Runnable {
      * @param subscription Abonnement d'un Subscriber à un Topic
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
-    private int onSubscribe(String topicName, Subscription subscription) {
+    public int onSubscribe(String topicName, Subscription subscription) {
         Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
         if (topic == null) return ERROR;
 
@@ -61,7 +61,7 @@ public class BrokerThread implements Runnable {
      * @param subscription Abonnement d'un Subscriber à un Topic
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
-    private int onUnsubscribe(String topicName, Subscription subscription) {
+    public int onUnsubscribe(String topicName, Subscription subscription) {
         Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null); //TopicManager.find(topicName) tree<Topic>
         if (topic == null) return ERROR;
 
@@ -76,7 +76,7 @@ public class BrokerThread implements Runnable {
      * @param ad        Annone de publication d'un publisher pour Topic
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
-    private int onAdvertise(String topicName, Advertisement ad) {
+    public int onAdvertise(String topicName, Advertisement ad) {
         Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
         if (topic == null) {
             topic = new Topic(topicName);
@@ -93,7 +93,7 @@ public class BrokerThread implements Runnable {
      * @param ad        Annone de publication d'un publisher pour Topic
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
-    private int onUnadvertise(String topicName, Advertisement ad) {
+    public int onUnadvertise(String topicName, Advertisement ad) {
         Topic topic = this.topics.stream().filter(t -> t.getName().equals(topicName)).findFirst().orElse(null);
         if (topic == null) return ERROR;
 
@@ -112,7 +112,7 @@ public class BrokerThread implements Runnable {
      * @param content   Contenu du message
      * @param format    Format du message
      */
-    private void notifySubscribers(String topicName, String content, String format) {
+    public void notifySubscribers(String topicName, String content, String format) {
         var topicList = this.topics.stream().filter(t -> t.getName().equals(topicName)).toList(); //List of topics
 
         for (Topic topic : topicList) {
@@ -139,24 +139,6 @@ public class BrokerThread implements Runnable {
         }
     }
 
-    private static Document convertStringToXMLDocument(String xmlString) {
-        //Parser that produces DOM object trees from XML content
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
-        //API to obtain DOM Document instance
-        DocumentBuilder builder = null;
-        try {
-            //Create DocumentBuilder with default configuration
-            builder = factory.newDocumentBuilder();
-
-            //Parse the content to Document object
-            Document doc = builder.parse(new InputSource(new StringReader(xmlString)));
-            return doc;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     /**
      * Écoute les requêtes des clients
