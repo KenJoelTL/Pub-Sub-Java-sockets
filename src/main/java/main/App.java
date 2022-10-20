@@ -1,8 +1,8 @@
 package main;
 
-import classes.Broker;
-import display.Frame;
-import display.MainPanel;
+import model.Broker;
+import vue.Frame;
+import vue.MainPanel;
 
 
 public class App implements Runnable{

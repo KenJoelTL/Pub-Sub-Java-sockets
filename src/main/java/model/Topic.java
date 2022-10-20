@@ -1,4 +1,4 @@
-package classes;
+package model;
 
 
 import interfaces.IPublication;
@@ -38,7 +38,6 @@ public class Topic implements ITopic, Serializable {
             publisherList.add(ad.getPublisher());
         }
         return publisherList;
-//        return this.ads.stream().map(s -> s.getPublisher()).toList();
     }
 
     @Override
@@ -48,7 +47,6 @@ public class Topic implements ITopic, Serializable {
             subscriberList.add(s.getSubscriber());
         }
         return subscriberList;
-//        return this.subscriptions.stream().map(s -> s.getSubscriber()).toList();
     }
 
     public List<Subscription> getSubscriptions() {
@@ -63,7 +61,6 @@ public class Topic implements ITopic, Serializable {
         Advertisement newAd = new Advertisement(p, format);
         this.ads.add(newAd);
     }
-
 
     public boolean removeAdvertisement(Advertisement ad) {
         return this.ads.remove(ad);

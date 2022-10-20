@@ -1,12 +1,7 @@
-package classes;
+package model;
 
 import interfaces.IPublication;
 import main.App;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import java.io.*;
 import java.net.Socket;
@@ -44,7 +39,7 @@ public class BrokerThread implements Runnable {
      * @param subscription Abonnement d'un Subscriber à un Topic
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
-    private int onSubscribe(String topicName, Subscription subscription) {
+    public int onSubscribe(String topicName, Subscription subscription) {
         Topic topic;
         List<Topic> topicList = this.topicRepo.findByName(topicName);
         if (topicList.isEmpty()) {
@@ -65,7 +60,7 @@ public class BrokerThread implements Runnable {
      * @param subscription Abonnement d'un Subscriber à un Topic
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
-    private int onUnsubscribe(String topicName, Subscription subscription) {
+    public int onUnsubscribe(String topicName, Subscription subscription) {
         List<Topic> topicList = this.topicRepo.findByName(topicName);
         if (topicList.isEmpty())
             return ERROR;
@@ -83,7 +78,7 @@ public class BrokerThread implements Runnable {
      * @param ad        Annone de publication d'un publisher pour Topic
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
-    private int onAdvertise(String topicName, Advertisement ad) {
+    public int onAdvertise(String topicName, Advertisement ad) {
         Topic topic;
         List<Topic> topicList = this.topicRepo.findByName(topicName);
         if (topicList.isEmpty()) {
@@ -103,7 +98,7 @@ public class BrokerThread implements Runnable {
      * @param ad        Annone de publication d'un publisher pour Topic
      * @return 1 s'il n'y a pas de problème, -1 dans le cas d'une anomalie
      */
-    private int onUnadvertise(String topicName, Advertisement ad) {
+    public int onUnadvertise(String topicName, Advertisement ad) {
         List<Topic> topicList = this.topicRepo.findByName(topicName);
         if (topicList.isEmpty())
             return ERROR;
@@ -124,7 +119,7 @@ public class BrokerThread implements Runnable {
      * @param content   Contenu du message
      * @param format    Format du message
      */
-    private void notifySubscribers(String topicName, String content, String format) {
+    public void notifySubscribers(String topicName, String content, String format) {
         ArrayList<Topic> topicList = (ArrayList<Topic>) this.topicRepo.findByCorrespondingName(topicName); // List of
                                                                                                            // topics
 
@@ -216,7 +211,7 @@ public class BrokerThread implements Runnable {
             Advertisement ad = new Advertisement(p, IPublication.Format.valueOf(format));
             response = this.onUnadvertise(topicName, ad);
 
-            this.app.updateLog("Publisher #" + p.getId() + " has UNADVERTISED: " + topicName + " | ");
+            this.app.updateLog("Publisher #" + p.getId() + " has UNADVERTISED: " + topicName + " | " + format);
             this.stop();
 
         } else if ("SUBSCRIBE".equals(action)) {

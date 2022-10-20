@@ -1,4 +1,4 @@
-package classes;
+package model;
 
 import interfaces.IPublication;
 import interfaces.ISubscriber;
@@ -7,7 +7,6 @@ import interfaces.ITopic;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
 
 /**
  * Client recevant des publications de Topics auxquels il est abonné

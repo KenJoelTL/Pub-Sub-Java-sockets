@@ -1,4 +1,4 @@
-package classes;
+package model;
 
 import java.net.ServerSocket;
 import java.net.Socket;

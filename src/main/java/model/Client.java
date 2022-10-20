@@ -1,4 +1,4 @@
-package classes;
+package model;
 
 import interfaces.IClient;
 

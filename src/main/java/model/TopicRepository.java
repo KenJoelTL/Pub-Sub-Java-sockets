@@ -1,4 +1,4 @@
-package classes;
+package model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +32,7 @@ public class TopicRepository {
         List<Topic> candidateTopicList = this.topics.stream().filter( t-> t.getName().split("/")[0].equals(topicToFindSplit[0]) ).toList();
 
         // Filtrage de la liste des candidats -> topicToNotify
+        // Retire le topic de la liste de candidat: "candidateTopicList.stream().filter( t-> !t.equals(currentTopic) ).toList();"
         while(!candidateTopicList.isEmpty()) {
             Topic currentTopic = candidateTopicList.get(0);
             String[] cTopicNameSplit = currentTopic.getName().split("/",0);
@@ -39,7 +40,6 @@ public class TopicRepository {
 
             // Correspondance parfaite ou
             if (topicNameToFind.equals(currentTopic.getName()) || currentTopic.getName().equals("#")) {
-//                candidateTopicList.remove(currentTopic);
                 candidateTopicList = candidateTopicList.stream().filter( t-> !t.equals(currentTopic) ).toList();
                 topicToNotifyList.add(currentTopic);
                 checkNextTerm = false;
@@ -49,7 +49,6 @@ public class TopicRepository {
                 checkNextTerm = false;
                 // Correspondance partielle avec #
                 if (cTopicNameSplit.length - 1 >= indexNextTerm && (cTopicNameSplit[indexNextTerm].equals("#"))) {
-//                    candidateTopicList.remove(topicNameToFind);
                     candidateTopicList = candidateTopicList.stream().filter( t-> !t.equals(currentTopic) ).toList();
                     topicToNotifyList.add(currentTopic);
                 }
@@ -60,7 +59,6 @@ public class TopicRepository {
                 ) {
                     // si le prochain terme est le dernier
                     if (indexNextTerm == cTopicNameSplit.length-1) {
-//                        candidateTopicList.remove(topicNameToFind);
                         candidateTopicList = candidateTopicList.stream().filter( t-> !t.equals(currentTopic) ).toList();
                         topicToNotifyList.add(currentTopic);
                     }
@@ -73,7 +71,6 @@ public class TopicRepository {
                 // Aucune correspondance
                 else {
                     candidateTopicList = candidateTopicList.stream().filter( t-> !t.equals(currentTopic) ).toList();
-//                    candidateTopicList.remove(currentTopic);
                 }
             }
         }
