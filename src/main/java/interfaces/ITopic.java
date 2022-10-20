@@ -5,8 +5,6 @@
  */
 package interfaces;
 
-import classes.Subscriber;
-
 import java.util.List;
 
 /**

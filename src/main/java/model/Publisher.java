@@ -1,4 +1,4 @@
-package classes;
+package model;
 
 import interfaces.IPublication;
 import interfaces.IPublisher;
@@ -12,6 +12,10 @@ import java.io.*;
  * @author AP57630
  */
 public class Publisher extends Client implements IPublisher {
+
+    public Publisher(long id, int port, int brokerPort, String host) {
+        super(id, port, brokerPort, host);
+    }
 
     public Publisher(long id, int port, int brokerPort) {
         super(id, port, brokerPort);
@@ -36,6 +40,7 @@ public class Publisher extends Client implements IPublisher {
 
     public void publish(String topicName, String content, IPublication.Format format) {
         try {
+            System.out.println("PUBLISHING\n"+content);
             Request req = new Request(this.getId(), "PUBLISH", format.name(), topicName, content);
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);

@@ -13,5 +13,7 @@ import java.net.Socket;
  * @author AP57630
  */
 public interface IClient {    
-    public void connect(Socket socket) throws IOException;    
+    public void connect() throws IOException;
+    public void disconnect() throws IOException;
+
 }

@@ -1,11 +1,6 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import classes.Advertisement;
-import classes.BrokerThread;
-import classes.Publication;
-import classes.Publisher;
-import classes.Subscriber;
-import classes.Subscription;
-import classes.Topic;
+
+import model.*;
 import interfaces.IPublication;
 import main.App;
 
@@ -34,7 +29,8 @@ public class TestBroker {
   public void init() {
     app = new App();
     Publisher p = new Publisher(1);
-    brokerThread = new BrokerThread(null, topicList, app);
+    TopicRepository topicRepository = new TopicRepository(topicList);
+    brokerThread = new BrokerThread(null, topicRepository, app);
     advertisement = new Advertisement(p, IPublication.Format.valueOf("XML"));
     subscriber = new Subscriber(1);
     subscription = new Subscription(subscriber, IPublication.Format.valueOf("XML"));
