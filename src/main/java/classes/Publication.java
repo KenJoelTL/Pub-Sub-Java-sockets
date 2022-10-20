@@ -27,7 +27,8 @@ public class Publication implements IPublication, Serializable {
     public String fromCanonicalToXML() {
         String xmlstr = "";
         if (format.equals(Format.JSON)) {
-            xmlstr = XML.toString(message);
+            JSONObject jo = new JSONObject(message);
+            xmlstr = XML.toString(jo);
         } else {
             xmlstr = message;
         }

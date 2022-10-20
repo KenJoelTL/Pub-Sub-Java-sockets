@@ -21,13 +21,11 @@ public class BrokerThread implements Runnable {
     private final int ERROR = -1;
     private final int SUCCESS = 1;
 
-
     private Socket socket;
     private boolean isRunning;
     private Thread thread;
     private TopicRepository topicRepo;
     private App app;
-
 
     public BrokerThread(Socket clientSocket, TopicRepository topicRepository, App app) {
 
@@ -69,7 +67,8 @@ public class BrokerThread implements Runnable {
      */
     private int onUnsubscribe(String topicName, Subscription subscription) {
         List<Topic> topicList = this.topicRepo.findByName(topicName);
-        if (topicList.isEmpty()) return ERROR;
+        if (topicList.isEmpty())
+            return ERROR;
 
         Topic topic = topicList.get(0);
         topic.removeSubscription(subscription);
@@ -77,7 +76,8 @@ public class BrokerThread implements Runnable {
     }
 
     /**
-     * Crée annonce de publication pour un Topic pour un format de message source spécifié
+     * Crée annonce de publication pour un Topic pour un format de message source
+     * spécifié
      *
      * @param topicName Identifiant du Topic
      * @param ad        Annone de publication d'un publisher pour Topic
@@ -105,7 +105,8 @@ public class BrokerThread implements Runnable {
      */
     private int onUnadvertise(String topicName, Advertisement ad) {
         List<Topic> topicList = this.topicRepo.findByName(topicName);
-        if (topicList.isEmpty()) return ERROR;
+        if (topicList.isEmpty())
+            return ERROR;
 
         Topic topic = topicList.get(0);
         int isRemoved = topic.removeAdvertisement(ad) ? SUCCESS : ERROR;
@@ -124,10 +125,10 @@ public class BrokerThread implements Runnable {
      * @param format    Format du message
      */
     private void notifySubscribers(String topicName, String content, String format) {
-        ArrayList<Topic> topicList = (ArrayList<Topic>) this.topicRepo.findByCorrespondingName(topicName); //List of topics
+        ArrayList<Topic> topicList = (ArrayList<Topic>) this.topicRepo.findByCorrespondingName(topicName); // List of
+                                                                                                           // topics
 
         for (Topic topic : topicList) {
-//            System.out.println("Allo");
             for (Subscription subtion : topic.getSubscriptions()) {
                 Publication p = new Publication(topic, format, content);
                 String message = "";
@@ -142,9 +143,11 @@ public class BrokerThread implements Runnable {
                     ObjectOutputStream output = new ObjectOutputStream(socketClient.getOutputStream());
                     output.writeObject(message);
 
-                    this.app.updateLog("Subscriber #" + ((Subscriber) subtion.getSubscriber()).getId() + " got NOTIFIED about: " + topicName + " in " + format);
+                    this.app.updateLog("Subscriber #" + ((Subscriber) subtion.getSubscriber()).getId()
+                            + " got NOTIFIED about: " + topicName + " in " + format);
                     this.app.updateLog("***********");
-                    this.app.updateLog("\tSubscriber #" + ((Subscriber) subtion.getSubscriber()).getId() + " RECEIVED\n" +message);
+                    this.app.updateLog("\tSubscriber #" + ((Subscriber) subtion.getSubscriber()).getId() + " RECEIVED\n"
+                            + message);
                     this.app.updateLog("***********");
 
                 } catch (Exception e) {
@@ -224,7 +227,8 @@ public class BrokerThread implements Runnable {
 
             Subscription subscription = new Subscription(subscriber, IPublication.Format.valueOf(format));
             response = this.onSubscribe(topicName, subscription);
-            this.app.updateLog("Subscriber #" + subscriber.getId() + " has SUBSCRIBED to: " + topicName + " | " + format);
+            this.app.updateLog(
+                    "Subscriber #" + subscriber.getId() + " has SUBSCRIBED to: " + topicName + " | " + format);
 
         } else if ("UNSUBSCRIBE".equals(action)) {
 
@@ -234,7 +238,8 @@ public class BrokerThread implements Runnable {
 
             Subscription subscription = new Subscription(subscriber, IPublication.Format.valueOf(format));
             response = this.onUnsubscribe(topicName, subscription);
-            this.app.updateLog("Subscriber #" + subscriber.getId() + " has UNSUBSCRIBED to: " + topicName + " | " + format);
+            this.app.updateLog(
+                    "Subscriber #" + subscriber.getId() + " has UNSUBSCRIBED to: " + topicName + " | " + format);
 
         }
 
@@ -248,7 +253,7 @@ public class BrokerThread implements Runnable {
         this.listenToRequests();
     }
 
-    //-- synchronized to work directly with the thread
+    // -- synchronized to work directly with the thread
     public synchronized void start() {
 
         if (this.isRunning) {
