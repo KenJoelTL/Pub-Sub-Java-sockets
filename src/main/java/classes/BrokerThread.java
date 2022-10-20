@@ -10,6 +10,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -123,9 +124,10 @@ public class BrokerThread implements Runnable {
      * @param format    Format du message
      */
     private void notifySubscribers(String topicName, String content, String format) {
-        var topicList = this.topicRepo.findByCorrespondingName(topicName); //List of topics
+        ArrayList<Topic> topicList = (ArrayList<Topic>) this.topicRepo.findByCorrespondingName(topicName); //List of topics
 
         for (Topic topic : topicList) {
+//            System.out.println("Allo");
             for (Subscription subtion : topic.getSubscriptions()) {
                 Publication p = new Publication(topic, format, content);
                 String message = "";
@@ -141,6 +143,9 @@ public class BrokerThread implements Runnable {
                     output.writeObject(message);
 
                     this.app.updateLog("Subscriber #" + ((Subscriber) subtion.getSubscriber()).getId() + " got NOTIFIED about: " + topicName + " in " + format);
+                    this.app.updateLog("***********");
+                    this.app.updateLog("\tSubscriber #" + ((Subscriber) subtion.getSubscriber()).getId() + " RECEIVED\n" +message);
+                    this.app.updateLog("***********");
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -197,8 +202,8 @@ public class BrokerThread implements Runnable {
             String format = req.getFormat();
             String content = req.getContent();
             Publisher p = new Publisher(req.getSenderClientId());
-            this.notifySubscribers(topicName, content, format);
             this.app.updateLog("Publisher #" + p.getId() + " has PUBLISHED to: " + topicName + " | " + format);
+            this.notifySubscribers(topicName, content, format);
             this.stop();
         } else if ("UNADVERTISE".equals(action)) {
 

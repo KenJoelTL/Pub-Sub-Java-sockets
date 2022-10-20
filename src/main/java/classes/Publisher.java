@@ -40,6 +40,7 @@ public class Publisher extends Client implements IPublisher {
 
     public void publish(String topicName, String content, IPublication.Format format) {
         try {
+            System.out.println("PUBLISHING\n"+content);
             Request req = new Request(this.getId(), "PUBLISH", format.name(), topicName, content);
             ObjectOutputStream output = new ObjectOutputStream(this.getSocket().getOutputStream());
             output.writeObject(req);

@@ -39,7 +39,8 @@ public class TopicRepository {
 
             // Correspondance parfaite ou
             if (topicNameToFind.equals(currentTopic.getName()) || currentTopic.getName().equals("#")) {
-                candidateTopicList.remove(topicNameToFind);
+//                candidateTopicList.remove(currentTopic);
+                candidateTopicList = candidateTopicList.stream().filter( t-> !t.equals(currentTopic) ).toList();
                 topicToNotifyList.add(currentTopic);
                 checkNextTerm = false;
             }
@@ -48,7 +49,8 @@ public class TopicRepository {
                 checkNextTerm = false;
                 // Correspondance partielle avec #
                 if (cTopicNameSplit.length - 1 >= indexNextTerm && (cTopicNameSplit[indexNextTerm].equals("#"))) {
-                    candidateTopicList.remove(topicNameToFind);
+//                    candidateTopicList.remove(topicNameToFind);
+                    candidateTopicList = candidateTopicList.stream().filter( t-> !t.equals(currentTopic) ).toList();
                     topicToNotifyList.add(currentTopic);
                 }
                 // Correspondance partielle -> on regarde si le prochain caractère est * ou le même
@@ -57,8 +59,9 @@ public class TopicRepository {
                         || (cTopicNameSplit[indexNextTerm].equals(topicToFindSplit[indexNextTerm])))
                 ) {
                     // si le prochain terme est le dernier
-                    if (indexNextTerm == cTopicNameSplit.length) {
-                        candidateTopicList.remove(topicNameToFind);
+                    if (indexNextTerm == cTopicNameSplit.length-1) {
+//                        candidateTopicList.remove(topicNameToFind);
+                        candidateTopicList = candidateTopicList.stream().filter( t-> !t.equals(currentTopic) ).toList();
                         topicToNotifyList.add(currentTopic);
                     }
                     // sinon on regarde le caractère suivant
@@ -69,7 +72,8 @@ public class TopicRepository {
                 }
                 // Aucune correspondance
                 else {
-                    candidateTopicList.remove(currentTopic);
+                    candidateTopicList = candidateTopicList.stream().filter( t-> !t.equals(currentTopic) ).toList();
+//                    candidateTopicList.remove(currentTopic);
                 }
             }
         }

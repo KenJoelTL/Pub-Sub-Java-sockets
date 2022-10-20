@@ -31,7 +31,6 @@ public class ClientMain {
         int clientPort = 5050;
         int brokerPort = 8022;
         String host = "127.0.0.1";
-        long clientID = 1;
 
         try {
             createSubs(host, clientPort, brokerPort);
@@ -42,27 +41,29 @@ public class ClientMain {
 
             connectPubs();
 
+            Thread.sleep(300);
+
             createAds();
 
-            Thread.sleep(300);
+            Thread.sleep(500);
 
             connectSubs();
 
             subscribeToTopics();
 
-            Thread.sleep(300);
+            Thread.sleep(500);
 
             connectPubs();
 
-            Thread.sleep(300);
+            Thread.sleep(500);
 
             publishToTopics();
-//
-//            Thread.sleep(300);
-//
-//            unsubscribeToTopics();
-//
-//            Thread.sleep(300);
+
+            Thread.sleep(500);
+
+            unsubscribeToTopics();
+
+            Thread.sleep(300);
 
             disconnectPubs();
             disconnectSubs();
@@ -242,7 +243,7 @@ public class ClientMain {
 
 
     public static void createAds() {
-        createAd(p1, "weather", "XML");
+        createAd(p1, "weather/laval", "XML");
         createAd(p2, "weather/montreal");
         createAd(p3,"weather/montreal/humidity", "XML");
         createAd(p4,"sport/montreal","XML");
@@ -252,15 +253,15 @@ public class ClientMain {
 
     public static void subscribeToTopics() {
         subscribeTopicJson(s1, "weather/*");
-        subscribeTopicXml(s2, "weather/montreal");
+        subscribeTopicXml(s2, "weather/#");
         subscribeTopicJson(s3,"weather/montreal/humidity");
-        subscribeTopicJson(s4,"sport/#");
-        subscribeTopicXml(s5,"sport");
+        subscribeTopicXml(s4,"sport/#");
+        subscribeTopicJson(s5,"sport");
     }
 
     public static void unsubscribeToTopics() {
         unsubscribeTopicJson(s1, "weather/*");
-        unsubscribeTopicXml(s2, "weather/montreal");
+        unsubscribeTopicXml(s2, "weather/#");
         unsubscribeTopicJson(s3,"weather/montreal/humidity");
         unsubscribeTopicJson(s4,"sport/#");
         unsubscribeTopicXml(s5,"sport");
